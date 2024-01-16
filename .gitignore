@@ -1,0 +1,31 @@
+# Rider-specific files and folders
+.idea/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/caches/
+.idea/modules.xml
+.idea/kotlin/
+.idea/misc.xml
+.idea/vcs.xml
+
+# Compiled binaries
+bin/
+obj/
+
+# Packages folder
+packages/
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Visual Studio code coverage results
+*.coverage
+*.opendb
+
+# IDE
+.vs
