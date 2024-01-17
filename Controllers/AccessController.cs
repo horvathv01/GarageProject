@@ -116,9 +116,7 @@ public class AccessController : ControllerBase
     [Authorize]
     public async Task<IActionResult> UpdateUser([FromBody] UserDTO newUser, long id)
     {
-        long loggedInUserId;
-        long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out loggedInUserId );
-        var loggedInUser = await _userService.GetUserById( loggedInUserId );
+        var loggedInUser = await GetLoggedInUser();
 
         if( loggedInUser == null )
         {
@@ -126,7 +124,7 @@ public class AccessController : ControllerBase
         }
 
         //if a non-manager user attempts to update a user that is not him/herself
-        if( loggedInUser.Id != id && loggedInUser.Type != UserType.Manager )
+        if( !IsUserAuthorizedToHandleUser(loggedInUser, id) )
         {
             return BadRequest( "You are not authorized to update this user." );
         }
@@ -138,6 +136,18 @@ public class AccessController : ControllerBase
         }
 
         return BadRequest("Something went wrong");
+    }
+
+    private async Task<User?> GetLoggedInUser()
+    {
+        long userId;
+        long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
+        return await _userService.GetUserById( userId );
+    }
+
+    private bool IsUserAuthorizedToHandleUser( User? loggedInUser, long otherUserId)
+    {
+        return loggedInUser != null && ( loggedInUser.Id == otherUserId || loggedInUser.Type == UserType.Manager );
     }
 
 
