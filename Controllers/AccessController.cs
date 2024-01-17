@@ -27,7 +27,6 @@ public class AccessController : ControllerBase
     [HttpPost("registration")]
     public async Task<IActionResult> RegisterUser([FromBody] UserDTO user)
     {
-        //check if user has already registered with this email
         var registeredUser = await _userService.GetUserByEmail(user.Email);
         Console.WriteLine(user);
         if (registeredUser != null)
@@ -36,7 +35,6 @@ public class AccessController : ControllerBase
             return Conflict("This email has already been registered.");
         }
 
-        //user.Type = Enum.GetName(typeof(UserType), UserType.Client);
         await _userService.AddUser(user);
         
         return Ok($"{user.Type} {user.Name} has been successfully registered.");
@@ -45,7 +43,12 @@ public class AccessController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> LoginUser()
     {
-        string authorizationHeader = HttpContext.Request.Headers["Authorization"];
+        string? authorizationHeader = HttpContext.Request.Headers["Authorization"];
+
+        if(authorizationHeader == null) 
+        {
+            return Unauthorized("Authorization header is missing.");
+        }
 
         var base64String = Convert.FromBase64String(authorizationHeader);
         var credentials = Encoding.UTF8.GetString(base64String);
@@ -111,44 +114,4 @@ public class AccessController : ControllerBase
             return StatusCode(500, $"Logout failed: {e.Message}");
         }
     }
-
-    [HttpPut("update/{id}")]
-    [Authorize]
-    public async Task<IActionResult> UpdateUser([FromBody] UserDTO newUser, long id)
-    {
-        var loggedInUser = await GetLoggedInUser();
-
-        if( loggedInUser == null )
-        {
-            return BadRequest( "Logged in user could not be retrieved" );
-        }
-
-        //if a non-manager user attempts to update a user that is not him/herself
-        if( !IsUserAuthorizedToHandleUser(loggedInUser, id) )
-        {
-            return BadRequest( "You are not authorized to update this user." );
-        }
-        
-        var result = await _userService.UpdateUser(id, newUser);
-        if (result)
-        {
-            return Ok($"User with id {id} has been updated successfully");    
-        }
-
-        return BadRequest("Something went wrong");
-    }
-
-    private async Task<User?> GetLoggedInUser()
-    {
-        long userId;
-        long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
-        return await _userService.GetUserById( userId );
-    }
-
-    private bool IsUserAuthorizedToHandleUser( User? loggedInUser, long otherUserId)
-    {
-        return loggedInUser != null && ( loggedInUser.Id == otherUserId || loggedInUser.Type == UserType.Manager );
-    }
-
-
 }

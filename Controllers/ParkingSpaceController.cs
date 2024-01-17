@@ -43,7 +43,7 @@ namespace PsychAppointments_API.Controllers
 
         [HttpPost]
         //[Authorize]
-        public async Task<IActionResult> AddParkingSpace( ParkingSpace space )
+        public async Task<IActionResult> AddParkingSpace( [FromBody] ParkingSpace space )
         {
             var result = await _parkingSpaceService.AddParkingSpace( space );
             if ( result )

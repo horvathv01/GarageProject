@@ -73,19 +73,33 @@ public class UserController : ControllerBase
 
 
     [HttpPut( "{id}" )]
-    //[Authorize]
-    public async Task<IActionResult> UpdateUser( [FromBody] UserDTO updatedUser, long id )
+    [Authorize]
+    public async Task<IActionResult> UpdateUser( [FromBody] UserDTO newUser, long id )
     {
-        var result = await _userService.UpdateUser( id, updatedUser );
+        var loggedInUser = await GetLoggedInUser();
+
+        if ( loggedInUser == null )
+        {
+            return BadRequest( "Logged in user could not be retrieved" );
+        }
+
+        //if a non-manager user attempts to update a user that is not him/herself
+        if ( !IsUserAuthorizedToHandleUser( loggedInUser, id ) )
+        {
+            return BadRequest( "You are not authorized to update this user." );
+        }
+
+        var result = await _userService.UpdateUser( id, newUser );
         if ( result )
         {
-            return Ok( $"User with id {id} has been successfully updated." );
+            return Ok( $"User with id {id} has been updated successfully" );
         }
+
         return BadRequest( "Something went wrong" );
     }
 
     [HttpDelete( "{id}" )]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> DeleteUser( long id )
     {
         var user = await GetLoggedInUser();
@@ -111,6 +125,11 @@ public class UserController : ControllerBase
         long userId;
         long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
         return await _userService.GetUserById( userId );
+    }
+
+    private bool IsUserAuthorizedToHandleUser( User? loggedInUser, long otherUserId )
+    {
+        return loggedInUser != null && ( loggedInUser.Id == otherUserId || loggedInUser.Type == UserType.Manager );
     }
 
 }

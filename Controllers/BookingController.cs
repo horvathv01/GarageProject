@@ -1,4 +1,5 @@
-﻿using GarageProject.Models;
+﻿using GarageProject.Converters;
+using GarageProject.Models;
 using GarageProject.Models.DTOs;
 using GarageProject.Models.Enums;
 using GarageProject.Service;
@@ -13,11 +14,13 @@ namespace GarageProject.Controllers
     {
         private readonly IBookingService _bookingService;
         private readonly IUserService _userService;
+        private readonly IServiceProvider _serviceProvider;
 
-        public BookingController( IBookingService bookingService, IUserService userService ) 
+        public BookingController( IBookingService bookingService, IUserService userService, IServiceProvider serviceProvider ) 
         {
             _bookingService = bookingService;
             _userService = userService;
+            _serviceProvider = serviceProvider;
         }
 
         [HttpGet("{id}")]
@@ -54,7 +57,7 @@ namespace GarageProject.Controllers
             return result?.Select( b => new BookingDTO( b ) ).ToList();
         }
 
-        [HttpGet( "user/dates" )]
+        [HttpGet( "dates" )]
         //[Authorize]
         public async Task<IEnumerable<BookingDTO>?> GetBookingsByDates(
         [FromQuery] string startDate,
@@ -89,9 +92,76 @@ namespace GarageProject.Controllers
             return result?.Select(b => new BookingDTO(b)).ToList();
         }
 
+        [HttpGet("emptyspaces/date/{date}")]
+        //[Authorize]
+        public async Task<IEnumerable<ParkingSpace>?> GetEmptyParkingSpaces(string date)
+        {
+            DateTime dateParsed;
+            switch( date )
+            {
+                case "today":
+                    dateParsed = DateTime.Today;
+                    break;
+                case "tomorrow":
+                    dateParsed = DateTime.Today.AddDays( 1 );
+                    break;
+                default:
+                    bool parseResult = DateTime.TryParse( date, out dateParsed );
+                    if(!parseResult )
+                    {
+                        throw new InvalidOperationException( "Date parsing failed." );
+                    }
+                    break;
+            }
+            return await _bookingService.GetAvailableParkingSpacesForDate( dateParsed );
+        }
+
+        [HttpGet("emptyspaces/daterange")]
+        //[Authorize]
+        public async Task<IEnumerable<ParkingSpace>?> GetEmptyParkingSpacesForTimeRange(
+        [FromQuery] string startDate,
+        [FromQuery] string endDate )
+        {
+            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+            if ( dateTimeConverter == null )
+            {
+                throw new Exception( "Dependency injection failed." );
+            }
+            var startDateParsed = dateTimeConverter.Convert( startDate );
+            var endDateParsed = dateTimeConverter.Convert( endDate );
+
+            return await _bookingService.GetAvailableParkingSpacesForTimeRange(startDateParsed, endDateParsed );
+        }
+
+        [HttpGet("emptyspaces/amount/{date}")]
+        //[Authorize]
+        public async Task<int> GetAmountOfEmptySpacesFoRDate( string date )
+        {
+            DateTime dateParsed;
+            switch ( date )
+            {
+                case "today":
+                    dateParsed = DateTime.Today;
+                    break;
+                case "tomorrow":
+                    dateParsed = DateTime.Today.AddDays( 1 );
+                    break;
+                default:
+                    bool parseResult = DateTime.TryParse( date, out dateParsed );
+                    if ( !parseResult )
+                    {
+                        throw new InvalidOperationException( "Date parsing failed." );
+                    }
+                    break;
+            }
+
+            return await _bookingService.GetNumberOfEmptySpacesForDate( dateParsed );
+        }
+
+
         [HttpPost]
         //[Authorize]
-        public async Task<IActionResult> AddBooking(BookingDTO booking )
+        public async Task<IActionResult> AddBooking([FromBody] BookingDTO booking )
         {
             var result = await _bookingService.AddBooking(booking);
             if ( result )
