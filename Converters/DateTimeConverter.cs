@@ -12,6 +12,7 @@ namespace GarageProject.Converters
             {
                 throw new Exception( "Date parsing failed" );
             }
+            dateParsed = DateTime.SpecifyKind( dateParsed, DateTimeKind.Utc );
             return dateParsed;
         }
     }

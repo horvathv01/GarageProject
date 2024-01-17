@@ -5,6 +5,7 @@ using GarageProject.DAL;
 using GarageProject.Models;
 using GarageProject.Models.Enums;
 using System.Net;
+using GarageProject.Converters;
 
 namespace GarageProject.Service;
 
@@ -12,57 +13,49 @@ public class UserService : IUserService
 {
     private readonly GarageProjectContext _context;
     private readonly IAccessUtilities _hasher;
-    
+    private readonly IServiceProvider _serviceProvider;
     public UserService(
         GarageProjectContext context,
-        IAccessUtilities hasher
-        )
+        IAccessUtilities hasher,
+        IServiceProvider serviceProvider )
     {
         _context = context;
         _hasher = hasher;
-    }
-    
-    
-    public async Task<bool> AddUser(UserDTO user)
-    {
-        string password = _hasher.HashPassword(user.Password, user.Email);
-
-        DateTime birthDate = DateTime.MinValue;
-        DateTime.TryParse(user.DateOfBirth, out birthDate);
-        birthDate = DateTime.SpecifyKind(birthDate, DateTimeKind.Utc);
-        
-        try
-        {
-            if (user.Type == Enum.GetName(typeof(UserType), UserType.Manager))
-            {
-                var newManager = new Manager(user.Name, user.Email, user.Phone, birthDate, password);
-                await _context.Managers.AddAsync(newManager);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            else
-            {
-                var newUser = new User(user.Name, user.Email, user.Phone, birthDate, password);
-                await _context.Users.AddAsync( newUser );
-                await _context.SaveChangesAsync();
-                return true;
-            }
-
-            
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("Adding new user failed.");
-            Console.WriteLine(e);
-            return false;
-        }
-        
-        
+        _serviceProvider = serviceProvider;
     }
 
-    public async Task<User?> GetUserById(long id)
+    public async Task<bool> AddUser( UserDTO user )
     {
-        var user = await _context.Users.FirstOrDefaultAsync(cli => cli.Id == id);
+        string password = _hasher.HashPassword( user.Password, user.Email );
+
+        var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+        if ( dateTimeConverter == null )
+        {
+            throw new Exception( "Dependency injection failed." );
+        }
+        var birthDate = dateTimeConverter.Convert( user.DateOfBirth );
+
+        if ( user.Type == Enum.GetName( typeof( UserType ), UserType.Manager ) )
+        {
+            var newManager = new Manager( user.Name, user.Email, user.Phone, birthDate, password );
+            await _context.Managers.AddAsync( newManager );
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        else
+        {
+            var newUser = new User( user.Name, user.Email, user.Phone, birthDate, password );
+            await _context.Users.AddAsync( newUser );
+            await _context.SaveChangesAsync();
+            return true;
+        }
+    }
+
+    public async Task<User?> GetUserById( long id )
+    {
+        var user = await _context.Users
+            .Include( u => u.Bookings )
+            .FirstOrDefaultAsync( cli => cli.Id == id );
         if ( user != null && user.Type == UserType.Manager )
         {
             return user as Manager;
@@ -70,9 +63,11 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<User?> GetUserByEmail(string email)
+    public async Task<User?> GetUserByEmail( string email )
     {
-        var user = await _context.Users.FirstOrDefaultAsync( cli => cli.Email == email);
+        var user = await _context.Users
+            .Include( u => u.Bookings )
+            .FirstOrDefaultAsync( cli => cli.Email == email );
         if ( user != null && user.Type == UserType.Manager )
         {
             return user as Manager;
@@ -83,36 +78,56 @@ public class UserService : IUserService
     public async Task<IEnumerable<User>> GetAllUsers()
     {
         return await _context.Users
+            .Include(u => u.Bookings)
             .ToListAsync();
     }
 
     public async Task<IEnumerable<Manager>> GetAllManagers()
     {
         return await _context.Managers
+            .Include( u => u.Bookings )
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<User>> GetListOfUsers(List<long> ids)
+    public async Task<IEnumerable<User>> GetListOfUsers( List<long> ids )
     {
-        var users = await _context.Users.Where(cli => ids.Contains(cli.Id)).ToListAsync();
-        var managers = await _context.Managers.Where(man => ids.Contains(man.Id)).ToListAsync();
+        var users = await _context.Users.Where( cli => ids.Contains( cli.Id ) )
+            .Include( u => u.Bookings )
+            .ToListAsync();
+        var managers = await _context.Managers.Where( man => ids.Contains( man.Id ) )
+            .Include( u => u.Bookings )
+            .ToListAsync();
 
         return users.Cast<User>()
             .Union( managers );
     }
 
-    public async Task<bool> UpdateUser( long id, UserDTO newUser )
+    public async Task<bool> UpdateUser( long id, UserDTO newUser, User? loggedInUser = null )
     {
+        if ( loggedInUser == null )
+        {
+            throw new InvalidOperationException( "Logged in user could not be retrieved" );
+        }
+
+        if ( !IsUserAuthorizedToHandleUser( loggedInUser, id ) )
+        {
+            throw new UnauthorizedAccessException( "You are not authorized to update this user." );
+        }
+
         var user = await GetUserById( id );
         if ( user == null )
         {
-            return false;
+            throw new InvalidOperationException( "User not found in database." );
         }
+
         string password = _hasher.HashPassword( newUser.Password, newUser.Email );
 
-        DateTime newBirthDay = user.DateOfBirth;
-        DateTime.TryParse( newUser.DateOfBirth, out newBirthDay );
-        newBirthDay = DateTime.SpecifyKind( newBirthDay, DateTimeKind.Utc );
+        var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+        if ( dateTimeConverter == null )
+        {
+            throw new Exception( "Dependency injection failed." );
+        }
+        var newBirthDay = dateTimeConverter.Convert( newUser.DateOfBirth );
 
         if ( Enum.GetName( typeof( UserType ), user.Type ) != newUser.Type )
         {
@@ -141,27 +156,24 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> DeleteUser( long id )
+    public async Task<bool> DeleteUser( long id, User? loggedInUser = null )
     {
-        try
+        if ( !IsUserAuthorizedToHandleUser( loggedInUser, id ) )
         {
-            var user = await GetUserById( id );
-            if ( user != null )
-            {
-                _context.Remove( user );
-                await _context.SaveChangesAsync();
-                return true;
-            }
+            throw new UnauthorizedAccessException( "You are not authorized to update this user." );
+        }
+        var user = await GetUserById( id );
+        if ( user == null )
+        {
+            throw new InvalidOperationException( $"User with id {id} was not found." );
+        }
+        _context.Remove( user );
+        await _context.SaveChangesAsync();
+        return true;
+    }
 
-            Console.WriteLine( $"User with id {id} was not found." );
-            return false;
-        }
-        catch ( Exception e )
-        {
-            Console.WriteLine( $"Removing user with id {id} failed." );
-            Console.WriteLine( e );
-            return false;
-        }
+    private bool IsUserAuthorizedToHandleUser( User? loggedInUser, long otherUserId )
+    {
+        return loggedInUser != null && ( loggedInUser.Id == otherUserId || loggedInUser.Type == UserType.Manager );
     }
 }
-   

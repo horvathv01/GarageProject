@@ -37,8 +37,7 @@ namespace PsychAppointments_API.Controllers
         //[Authorize]
         public async Task<IEnumerable<ParkingSpace>?> GetParkingSpacesByListOfIds( [FromBody] List<long> ids )
         {
-            var result = await _parkingSpaceService.GetListOfParkingSpaces( ids );
-            return result?.ToList();
+            return await _parkingSpaceService.GetListOfParkingSpaces( ids );
         }
 
         [HttpPost]
@@ -57,20 +56,8 @@ namespace PsychAppointments_API.Controllers
         //[Authorize]
         public async Task<IActionResult> UpdateParkingSpace( long id, [FromBody] ParkingSpace newSpace)
         {
-            var oldSpace = await _parkingSpaceService.GetParkingSpaceById( id );
-            if ( oldSpace == null )
-            {
-                return BadRequest( $"Parking space with id {id} not found." );
-            }
-
             var user = await GetLoggedInUser();
-            //only allow if user is manager
-            if ( user == null || user.Type != UserType.Manager )
-            {
-                return Unauthorized( "You are not authorized to update this parking space." );
-            }
-
-            var result = await _parkingSpaceService.UpdateParkingSpace( id, newSpace );
+            var result = await _parkingSpaceService.UpdateParkingSpace( id, newSpace, user );
             if ( result )
             {
                 return Ok( "Updating parking space was successful." );
@@ -85,20 +72,8 @@ namespace PsychAppointments_API.Controllers
         //[Authorize]
         public async Task<IActionResult> DeleteParkingSpace( long id )
         {
-            var space = await _parkingSpaceService.GetParkingSpaceById( id );
-            if ( space == null )
-            {
-                return BadRequest( $"Parking space with id {id} not found." );
-            }
-
             var user = await GetLoggedInUser();
-            //only allow if user is manager
-            if ( user == null || user.Type != UserType.Manager )
-            {
-                return Unauthorized( "You are not authorized to update this parking space." );
-            }
-
-            var result = await _parkingSpaceService.DeleteParkingSpace( id );
+            var result = await _parkingSpaceService.DeleteParkingSpace( id, user );
             if ( result )
             {
                 return Ok( "Parking space deletion was successful." );

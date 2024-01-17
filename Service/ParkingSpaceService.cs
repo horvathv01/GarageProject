@@ -1,6 +1,7 @@
 ﻿using GarageProject.DAL;
 using Microsoft.EntityFrameworkCore;
 using GarageProject.Models;
+using GarageProject.Models.Enums;
 
 namespace GarageProject.Service
 {
@@ -42,50 +43,46 @@ namespace GarageProject.Service
             return await _context.ParkingSpaces.Where( s => ids.Contains( s.Id ) ).ToListAsync();
         }
 
-        public async Task<bool> UpdateParkingSpace( long id, ParkingSpace newSpace )
+        public async Task<bool> UpdateParkingSpace( long id, ParkingSpace newSpace, User? user = null )
         {
-            try
+            if ( user == null || user.Type != UserType.Manager )
             {
-                var space = await GetParkingSpaceById( id );
-                if ( space != null )
-                {
-                    space.IsDeleted = newSpace.IsDeleted;
-                    _context.ParkingSpaces.Update( space );
-                    await _context.SaveChangesAsync();
-                    return true;
-                }
-                else
-                {
-                    throw new Exception( $"Parking space with id {id} not found in db." );
-                }
+                throw new InvalidOperationException( "You are not authorized to update this parking space." );
             }
-            catch
+
+            var space = await GetParkingSpaceById( id );
+            if ( space != null )
             {
-                throw;
+                space.IsDeleted = newSpace.IsDeleted;
+                _context.ParkingSpaces.Update( space );
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                throw new Exception( $"Parking space with id {id} not found in db." );
             }
         }
 
-        public async Task<bool> DeleteParkingSpace( long id )
+        public async Task<bool> DeleteParkingSpace( long id, User? user = null )
         {
-            try
+            if ( user == null || user.Type != UserType.Manager )
             {
-                var space = await GetParkingSpaceById( id );
-                //DO NOT DELETE! set parkingSpace.IsDeleted to true!
-                if ( space != null )
-                {
-                    space.IsDeleted = true;
-                    _context.ParkingSpaces.Update( space );
-                    await _context.SaveChangesAsync();
-                    return true;
-                }
-                else
-                {
-                    throw new Exception( $"Parking space with id {id} not found in db." );
-                }
+                throw new InvalidOperationException( "You are not authorized to update this parking space." );
             }
-            catch
+
+            var space = await GetParkingSpaceById( id );
+            //DO NOT DELETE! set parkingSpace.IsDeleted to true!
+            if ( space != null )
             {
-                throw;
+                space.IsDeleted = true;
+                _context.ParkingSpaces.Update( space );
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                throw new Exception( $"Parking space with id {id} not found in db." );
             }
         }
     }

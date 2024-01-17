@@ -5,6 +5,7 @@ using GarageProject.Models.Enums;
 using GarageProject.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PsychAppointments_API.Converters;
 using System.Security.Claims;
 
 namespace GarageProject.Controllers
@@ -14,13 +15,17 @@ namespace GarageProject.Controllers
     {
         private readonly IBookingService _bookingService;
         private readonly IUserService _userService;
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IBookingConverter _converter;
 
-        public BookingController( IBookingService bookingService, IUserService userService, IServiceProvider serviceProvider ) 
+        public BookingController( 
+            IBookingService bookingService, 
+            IUserService userService,
+            IBookingConverter converter
+            ) 
         {
             _bookingService = bookingService;
             _userService = userService;
-            _serviceProvider = serviceProvider;
+            _converter = converter;
         }
 
         [HttpGet("{id}")]
@@ -28,11 +33,7 @@ namespace GarageProject.Controllers
         public async Task<BookingDTO?> GetBookingById(long id )
         {
             var result = await _bookingService.GetBookingById( id );
-            if( result != null )
-            {
-                return new BookingDTO( result );
-            }
-            return null;
+            return _converter.ConvertToBookingDTO( result );
         }
 
         [HttpGet]
@@ -40,21 +41,15 @@ namespace GarageProject.Controllers
         public async Task<IEnumerable<BookingDTO>?> GetAllBookings()
         {
             var result = await _bookingService.GetAllBookings();
-            return result?.Select( b => new BookingDTO( b ) ).ToList();
+            return _converter.ConvertToBookingDTOIEnumerable( result );
         }
 
         [HttpGet("user/{userId}")]
         //[Authorize]
         public async Task<IEnumerable<BookingDTO>?> GetBookingsByUser(long userId)
         {
-            var user = await _userService.GetUserById( userId );
-            if ( user == null )
-            {
-                throw new Exception( $"User with id {userId} not found" );
-            }
-            //should we allow this to managers only?
-            var result = await _bookingService.GetBookingsByUser( user );
-            return result?.Select( b => new BookingDTO( b ) ).ToList();
+            var result = await _bookingService.GetBookingsByUser( userId );
+            return _converter.ConvertToBookingDTOIEnumerable( result );
         }
 
         [HttpGet( "dates" )]
@@ -64,7 +59,7 @@ namespace GarageProject.Controllers
         [FromQuery] string endDate )
         {
             var result = await _bookingService.GetBookingsByDates( startDate, endDate );
-            return result?.Select( b => new BookingDTO( b ) ).ToList();
+            return _converter.ConvertToBookingDTOIEnumerable( result );
         }
 
         [HttpGet("user/dates")]
@@ -74,13 +69,8 @@ namespace GarageProject.Controllers
         [FromQuery] string startDate,
         [FromQuery] string endDate )
         {
-            var user = await _userService.GetUserById( userId );
-            if( user == null )
-            {
-                throw new Exception( $"User with id {userId} not found" );
-            }
-            var result = await _bookingService.GetBookingsByUser( user, startDate, endDate );
-            return result?.Select(b => new BookingDTO(b)).ToList();
+            var result = await _bookingService.GetBookingsByUser( userId, startDate, endDate );
+            return _converter.ConvertToBookingDTOIEnumerable( result );
         }
 
         [HttpGet("ids")]
@@ -89,31 +79,14 @@ namespace GarageProject.Controllers
         {
             
             var result = await _bookingService.GetListOfBookings( ids );
-            return result?.Select(b => new BookingDTO(b)).ToList();
+            return _converter.ConvertToBookingDTOIEnumerable( result );
         }
 
         [HttpGet("emptyspaces/date/{date}")]
         //[Authorize]
         public async Task<IEnumerable<ParkingSpace>?> GetEmptyParkingSpaces(string date)
         {
-            DateTime dateParsed;
-            switch( date )
-            {
-                case "today":
-                    dateParsed = DateTime.Today;
-                    break;
-                case "tomorrow":
-                    dateParsed = DateTime.Today.AddDays( 1 );
-                    break;
-                default:
-                    bool parseResult = DateTime.TryParse( date, out dateParsed );
-                    if(!parseResult )
-                    {
-                        throw new InvalidOperationException( "Date parsing failed." );
-                    }
-                    break;
-            }
-            return await _bookingService.GetAvailableParkingSpacesForDate( dateParsed );
+            return await _bookingService.GetAvailableParkingSpacesForDate( date );
         }
 
         [HttpGet("emptyspaces/daterange")]
@@ -122,40 +95,14 @@ namespace GarageProject.Controllers
         [FromQuery] string startDate,
         [FromQuery] string endDate )
         {
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            var startDateParsed = dateTimeConverter.Convert( startDate );
-            var endDateParsed = dateTimeConverter.Convert( endDate );
-
-            return await _bookingService.GetAvailableParkingSpacesForTimeRange(startDateParsed, endDateParsed );
+            return await _bookingService.GetAvailableParkingSpacesForTimeRange( startDate, endDate );
         }
 
         [HttpGet("emptyspaces/amount/{date}")]
         //[Authorize]
         public async Task<int> GetAmountOfEmptySpacesFoRDate( string date )
         {
-            DateTime dateParsed;
-            switch ( date )
-            {
-                case "today":
-                    dateParsed = DateTime.Today;
-                    break;
-                case "tomorrow":
-                    dateParsed = DateTime.Today.AddDays( 1 );
-                    break;
-                default:
-                    bool parseResult = DateTime.TryParse( date, out dateParsed );
-                    if ( !parseResult )
-                    {
-                        throw new InvalidOperationException( "Date parsing failed." );
-                    }
-                    break;
-            }
-
-            return await _bookingService.GetNumberOfEmptySpacesForDate( dateParsed );
+            return await _bookingService.GetNumberOfEmptySpacesForDate( date );
         }
 
 
@@ -175,21 +122,8 @@ namespace GarageProject.Controllers
         //[Authorize]
         public async Task<IActionResult> UpdateBooking(long id, [FromBody] BookingDTO newBooking)
         {
-            var booking = await _bookingService.GetBookingById( id );
-            if ( booking == null )
-            {
-                return BadRequest( $"Booking with id {id} not found." );
-            }
-
             var user = await GetLoggedInUser();
-            //only allow if user is manager or booking belongs to user
-            bool canHandle = IsUserAuthorizedToHandleBooking( user, booking );
-            if ( !canHandle )
-            {
-                return Unauthorized( "You are not authorized to update this booking." );
-            }
-
-            var result = await _bookingService.UpdateBooking( booking, newBooking );
+            var result = await _bookingService.UpdateBooking( id, newBooking, user );
             if ( result )
             {
                 return Ok( "Updating booking was successful." );
@@ -204,21 +138,8 @@ namespace GarageProject.Controllers
         //[Authorize]
         public async Task<IActionResult> DeleteBooking(long id)
         {
-            var booking = await _bookingService.GetBookingById(id);
-            if (booking == null)
-            {
-                return BadRequest($"Booking with id {id} not found.");
-            }
-
             var user = await GetLoggedInUser();
-            //only allow if user is manager or booking belongs to user
-            bool canHandle = IsUserAuthorizedToHandleBooking(user, booking);
-            if ( !canHandle )
-            {
-                return Unauthorized("You are not authorized to delete this booking.");
-            }
-            
-            var result = await _bookingService.DeleteBooking( booking );
+            var result = await _bookingService.DeleteBooking( id, user );
             if ( result )
             {
                 return Ok("Booking deletion was successful.");
@@ -234,11 +155,6 @@ namespace GarageProject.Controllers
             long userId;
             long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
             return await _userService.GetUserById( userId );
-        }
-
-        private bool IsUserAuthorizedToHandleBooking( User? user, Booking booking )
-        {
-            return user != null && ( booking.UserId == user.Id || user.Type == UserType.Manager );
         }
     }
 }

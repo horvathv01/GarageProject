@@ -5,14 +5,13 @@ namespace GarageProject.Models;
 
 public class Manager : User
 {
-    
     public Manager(string name, 
         string email, 
         string phone, 
         DateTime dateOfBirth,
         string password,
         List<Booking>? bookings = null,
-        long id = 0) : base(name, email, phone, dateOfBirth, password, bookings, id )
+        long id = 0) : base( name, email, phone, dateOfBirth, password, bookings, id )
     {
         Type = UserType.Manager;
     }
@@ -32,18 +31,6 @@ public class Manager : User
         DateOfBirth = user.DateOfBirth;
         Password = user.Password;
         Bookings = user.Bookings;
-    }
-    
-    public override bool Equals(object? obj)
-    {
-        return obj is Manager manager
-               && manager.Id == Id
-               && manager.Name == Name
-               && manager.Email == Email
-               && manager.Phone == Phone
-               && manager.DateOfBirth == DateOfBirth
-               && manager.Password == Password
-               && manager.Type == Type;
     }
 
     public override int GetHashCode()

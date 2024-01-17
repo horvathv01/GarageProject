@@ -9,7 +9,7 @@ namespace GarageProject.Service
         Task<ParkingSpace?> GetParkingSpaceById( long id );
         Task<IEnumerable<ParkingSpace>?> GetAllParkingSpaces();
         Task<IEnumerable<ParkingSpace>?> GetListOfParkingSpaces( List<long> ids );
-        Task<bool> UpdateParkingSpace( long id, ParkingSpace space );
-        Task<bool> DeleteParkingSpace( long id );
+        Task<bool> UpdateParkingSpace( long id, ParkingSpace space, User? user = null );
+        Task<bool> DeleteParkingSpace( long id, User? user = null );
     }
 }

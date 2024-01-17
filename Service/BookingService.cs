@@ -3,6 +3,8 @@ using GarageProject.Models;
 using GarageProject.Models.DTOs;
 using Microsoft.EntityFrameworkCore;
 using GarageProject.Converters;
+using Microsoft.AspNetCore.Http.HttpResults;
+using GarageProject.Models.Enums;
 
 namespace GarageProject.Service
 {
@@ -31,7 +33,6 @@ namespace GarageProject.Service
             try
             {
                 var user = await _userService.GetUserById( booking.User.Id );
-
                 if(user == null )
                 {
                     throw new Exception("Booking's user was not found");
@@ -86,7 +87,6 @@ namespace GarageProject.Service
         {
             return await _context.Bookings.FirstOrDefaultAsync( b => b.Id == id );
         }
-
         public async Task<IEnumerable<Booking>?> GetBookingsByDates( string startDate, string endDate )
         {
             var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
@@ -111,16 +111,28 @@ namespace GarageProject.Service
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Booking>?> GetBookingsByUser( User user )
+        public async Task<IEnumerable<Booking>?> GetBookingsByUser( long userId )
         {
+            var user = await _userService.GetUserById( userId );
+            if ( user == null )
+            {
+                throw new Exception( $"User with id {userId} not found" );
+            }
+
             return await _context.Bookings.Where( b => b.UserId == user.Id )
                 .Include( b => b.User )
                 .Include( b => b.ParkingSpace )
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<Booking>?> GetBookingsByUser( User user, string startDate, string endDate )
+        public async Task<IEnumerable<Booking>?> GetBookingsByUser( long userId, string startDate, string endDate )
         {
+            var user = await _userService.GetUserById( userId );
+            if ( user == null )
+            {
+                throw new Exception( $"User with id {userId} not found" );
+            }
+
             var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
             if ( dateTimeConverter == null )
             {
@@ -186,6 +198,42 @@ namespace GarageProject.Service
             return result == null ? 0 : result.Count();
         }
 
+        public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForDate( string date )
+        {
+            DateTime dateParsed;
+            switch ( date )
+            {
+                case "today":
+                    dateParsed = DateTime.Today;
+                    break;
+                case "tomorrow":
+                    dateParsed = DateTime.Today.AddDays( 1 );
+                    break;
+                default:
+                    var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+                    if ( dateTimeConverter == null )
+                    {
+                        throw new Exception( "Dependency injection failed." );
+                    }
+                    dateParsed = dateTimeConverter.Convert( date );
+                    break;
+            }
+            return await GetAvailableParkingSpacesForDate( dateParsed );
+        }
+
+        public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange( string startDate, string endDate )
+        {
+            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+            if ( dateTimeConverter == null )
+            {
+                throw new Exception( "Dependency injection failed." );
+            }
+            var startDateParsed = dateTimeConverter.Convert( startDate );
+            var endDateParsed = dateTimeConverter.Convert( endDate );
+
+            return await GetAvailableParkingSpacesForTimeRange(startDateParsed, endDateParsed );
+        }
+
         public async Task<bool> IsParkingSpaceFree(ParkingSpace space, DateTime start, DateTime end, long? bookingId = null)
         {
             var reassurance = await _parkingSpaceService.GetParkingSpaceById( space.Id );
@@ -195,7 +243,7 @@ namespace GarageProject.Service
             }
                 
             var bookings = await GetBookingsByDates( start, end );
-            var bookingsWithSearchedSpace = bookings?.Where( b => b.ParkingSpace.Equals( space ) );
+            var bookingsWithSearchedSpace = bookings?.Where( b => b.ParkingSpace != null && b.ParkingSpace.Equals( space ) );
 
             if( bookingsWithSearchedSpace != null && bookingsWithSearchedSpace.Count() > 0 )
             {
@@ -209,14 +257,20 @@ namespace GarageProject.Service
             return true;
         }
 
-        public async Task<bool> UpdateBooking( Booking oldBooking, BookingDTO newBooking )
+        public async Task<bool> UpdateBooking( long id, BookingDTO newBooking, User? user = null )
         {
             try
             {
-                var user = await _userService.GetUserById( newBooking.User.Id );
-                if ( user == null )
+                var oldBooking = await GetBookingById( id );
+                if ( oldBooking == null )
                 {
-                    throw new Exception( "Booking's user was not found" );
+                    throw new InvalidOperationException( $"Booking with id {id} not found." );
+                }
+
+                bool canHandle = IsUserAuthorizedToHandleBooking( user, oldBooking );
+                if ( !canHandle || user == null )
+                {
+                    throw new UnauthorizedAccessException( "You are not authorized to update this booking." );
                 }
 
                 var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
@@ -260,18 +314,29 @@ namespace GarageProject.Service
             }
         }
 
-        public async Task<bool> DeleteBooking( Booking booking )
+        public async Task<bool> DeleteBooking( long id, User? user = null )
         {
-            try
+
+            var booking = await GetBookingById( id );
+            if ( booking == null )
             {
-                _context.Remove( booking );
-                await _context.SaveChangesAsync();
-                return true;
+                throw new InvalidOperationException( $"Booking with id {id} was not found." );
             }
-            catch
+            
+            bool canHandle = IsUserAuthorizedToHandleBooking( user, booking );
+            if ( !canHandle )
             {
-                throw;
+                throw new UnauthorizedAccessException( "You are not authorized to update this booking." );
             }
+
+            _context.Remove( booking );
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        private bool IsUserAuthorizedToHandleBooking( User? user, Booking booking )
+        {
+            return user != null && ( booking.User.Id == user.Id || user.Type == UserType.Manager );
         }
     }
 }

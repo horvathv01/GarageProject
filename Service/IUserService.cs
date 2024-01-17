@@ -10,6 +10,6 @@ public interface IUserService
      Task<IEnumerable<User>> GetAllUsers();
      Task<IEnumerable<Manager>> GetAllManagers();
      Task<IEnumerable<User>> GetListOfUsers(List<long> ids);
-     Task<bool> UpdateUser(long id, UserDTO newUser);
-     Task<bool> DeleteUser(long id);
+     Task<bool> UpdateUser(long id, UserDTO newUser, User? loggedInUser = null);
+     Task<bool> DeleteUser(long id, User? loggedInUser = null );
 }

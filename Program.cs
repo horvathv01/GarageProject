@@ -7,6 +7,7 @@ using GarageProject.Service;
 using GarageProject.Service.Factories;
 using GarageProject.Service;
 using GarageProject.Converters;
+using PsychAppointments_API.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -55,6 +56,8 @@ builder.Services.AddTransient<IBookingService, BookingService>();
 builder.Services.AddTransient<IParkingSpaceService, ParkingSpaceService>();
 
 builder.Services.AddScoped<IDateTimeConverter, DateTimeConverter>();
+builder.Services.AddScoped<IUserConverter, UserConverter>();
+builder.Services.AddScoped<IBookingConverter, BookingConverter>();
 
 builder.Services.AddControllers();
 
