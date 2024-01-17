@@ -1,8 +1,8 @@
 ﻿using GarageProject.Models;
 using GarageProject.Models.DTOs;
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 
-namespace PsychAppointments_API.Service
+namespace GarageProject.Service
 {
     public interface IBookingService
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PsychAppointments_API.Models
+namespace GarageProject.Models
 {
     public class ParkingSpace
     {
@@ -19,6 +19,11 @@ namespace PsychAppointments_API.Models
         public override int GetHashCode()
         {
             throw new NotImplementedException();
+        }
+
+        public override string ToString()
+        {
+            return $"Parking Space Id: {Id}, IsDeleted: {IsDeleted}";
         }
     }
 }

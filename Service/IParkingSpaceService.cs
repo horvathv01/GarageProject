@@ -1,7 +1,7 @@
 ﻿using GarageProject.Models;
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 
-namespace PsychAppointments_API.Service
+namespace GarageProject.Service
 {
     public interface IParkingSpaceService
     {

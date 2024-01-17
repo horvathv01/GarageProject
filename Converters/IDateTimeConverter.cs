@@ -1,4 +1,4 @@
-﻿namespace PsychAppointments_API.Converters
+﻿namespace GarageProject.Converters
 {
     public interface IDateTimeConverter
     {

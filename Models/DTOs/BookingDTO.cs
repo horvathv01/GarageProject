@@ -1,5 +1,5 @@
 ﻿using GarageProject.Models;
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GarageProject.Models.DTOs

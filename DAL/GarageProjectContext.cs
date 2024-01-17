@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using GarageProject.Models;
-using PsychAppointments_API.Models;
 
 namespace GarageProject.DAL;
 

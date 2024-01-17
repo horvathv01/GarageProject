@@ -1,7 +1,6 @@
-﻿using GarageProject.Models;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
-namespace PsychAppointments_API.Models
+namespace GarageProject.Models
 {
     public class Booking
     {

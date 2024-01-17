@@ -20,7 +20,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet( "{id}" )]
-    [Authorize]
+    //[Authorize]
     public async Task<UserDTO?> GetUser( long id )
     {
         var result = await _userService.GetUserById( id );
@@ -32,7 +32,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
+    //[Authorize]
     public async Task<List<UserDTO>?> GetAllUsers()
     {
 
@@ -46,7 +46,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet( "email/{email}" )]
-    [Authorize]
+    //[Authorize]
     public async Task<UserDTO?> GetUserByEmail( string email )
     {
 
@@ -59,7 +59,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet( "allmanagers" )]
-    [Authorize]
+    //[Authorize]
     public async Task<List<UserDTO>?> GetAllManagers()
     {
         var result = await _userService.GetAllManagers();
@@ -73,7 +73,7 @@ public class UserController : ControllerBase
 
 
     [HttpPut( "{id}" )]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> UpdateUser( [FromBody] UserDTO updatedUser, long id )
     {
         var result = await _userService.UpdateUser( id, updatedUser );
@@ -85,7 +85,7 @@ public class UserController : ControllerBase
     }
 
     [HttpDelete( "{id}" )]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> DeleteUser( long id )
     {
         var user = await GetLoggedInUser();

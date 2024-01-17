@@ -4,11 +4,9 @@ using GarageProject.Models.Enums;
 using GarageProject.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PsychAppointments_API.Models;
-using PsychAppointments_API.Service;
 using System.Security.Claims;
 
-namespace PsychAppointments_API.Controllers
+namespace GarageProject.Controllers
 {
     [ApiController, Route( "booking" )]
     public class BookingController : ControllerBase
@@ -27,14 +25,14 @@ namespace PsychAppointments_API.Controllers
         public async Task<BookingDTO?> GetBookingById(long id )
         {
             var result = await _bookingService.GetBookingById( id );
-            if(result == null )
+            if( result != null )
             {
                 return new BookingDTO( result );
             }
             return null;
         }
 
-        [HttpGet()]
+        [HttpGet]
         //[Authorize]
         public async Task<IEnumerable<BookingDTO>?> GetAllBookings()
         {
@@ -91,7 +89,7 @@ namespace PsychAppointments_API.Controllers
             return result?.Select(b => new BookingDTO(b)).ToList();
         }
 
-        [HttpPost()]
+        [HttpPost]
         //[Authorize]
         public async Task<IActionResult> AddBooking(BookingDTO booking )
         {
@@ -172,7 +170,5 @@ namespace PsychAppointments_API.Controllers
         {
             return user != null && ( booking.UserId == user.Id || user.Type == UserType.Manager );
         }
-
-
     }
 }

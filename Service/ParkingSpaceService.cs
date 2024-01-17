@@ -1,8 +1,8 @@
 ﻿using GarageProject.DAL;
 using Microsoft.EntityFrameworkCore;
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 
-namespace PsychAppointments_API.Service
+namespace GarageProject.Service
 {
     public class ParkingSpaceService : IParkingSpaceService
     {
@@ -18,6 +18,7 @@ namespace PsychAppointments_API.Service
             try
             {
                 await _context.ParkingSpaces.AddAsync( space );
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch

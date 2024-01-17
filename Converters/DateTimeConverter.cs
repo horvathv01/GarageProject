@@ -1,7 +1,7 @@
 ﻿
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 
-namespace PsychAppointments_API.Converters
+namespace GarageProject.Converters
 {
     public class DateTimeConverter : IDateTimeConverter
     {

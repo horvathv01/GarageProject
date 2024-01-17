@@ -5,8 +5,8 @@ using GarageProject.DAL;
 using GarageProject.Models;
 using GarageProject.Service;
 using GarageProject.Service.Factories;
-using PsychAppointments_API.Service;
-using PsychAppointments_API.Converters;
+using GarageProject.Service;
+using GarageProject.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,7 +45,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 
 // Add services to the container.
 builder.Services.AddDbContext<GarageProjectContext>(options => 
-    options.UseNpgsql(builder.Configuration.GetConnectionString("GarageProjectConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString( "GarageProjectConnection" ) ));
 
 
 builder.Services.AddScoped<IAccessUtilities, AccessUtilities>();
@@ -57,7 +57,7 @@ builder.Services.AddTransient<IBookingService, BookingService>();
 builder.Services.AddTransient<IParkingSpaceService, ParkingSpaceService>();
 
 //prepopulate DB and/or in memory repositories via interface for testing purposes
-builder.Services.AddScoped<IPrepopulate, Prepopulate>();
+//builder.Services.AddTransient<IPrepopulate, Prepopulate>();
 builder.Services.AddScoped<IDateTimeConverter, DateTimeConverter>();
 
 builder.Services.AddControllers();

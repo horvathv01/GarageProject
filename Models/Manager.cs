@@ -1,5 +1,5 @@
 using GarageProject.Models.Enums;
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 
 namespace GarageProject.Models;
 

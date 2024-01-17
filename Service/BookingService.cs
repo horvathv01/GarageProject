@@ -3,11 +3,11 @@ using GarageProject.Models;
 using GarageProject.Models.DTOs;
 using GarageProject.Service;
 using Microsoft.EntityFrameworkCore;
-using PsychAppointments_API.Converters;
-using PsychAppointments_API.Models;
+using GarageProject.Converters;
+using GarageProject.Models;
 using System.ComponentModel;
 
-namespace PsychAppointments_API.Service
+namespace GarageProject.Service
 {
     public class BookingService : IBookingService
     {
@@ -53,6 +53,7 @@ namespace PsychAppointments_API.Service
 
                 Booking newBooking = new Booking(user, parkingSpace, startDateParsed, endDateParsed);
                 await _context.Bookings.AddAsync( newBooking );
+                await _context.SaveChangesAsync();
                 return true;
             }
             catch
