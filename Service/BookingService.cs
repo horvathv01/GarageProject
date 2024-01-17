@@ -1,11 +1,8 @@
 ﻿using GarageProject.DAL;
 using GarageProject.Models;
 using GarageProject.Models.DTOs;
-using GarageProject.Service;
 using Microsoft.EntityFrameworkCore;
 using GarageProject.Converters;
-using System.ComponentModel;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GarageProject.Service
 {
@@ -14,13 +11,19 @@ namespace GarageProject.Service
         private readonly GarageProjectContext _context;
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IParkingSpaceService _parkingSpaceService;
         
 
-        public BookingService( GarageProjectContext context, IServiceProvider serviceProvider, IUserService userService ) 
+        public BookingService( 
+            GarageProjectContext context, 
+            IServiceProvider serviceProvider, 
+            IUserService userService, 
+            IParkingSpaceService parkingSpaceService ) 
         { 
             _context = context; 
             _serviceProvider = serviceProvider;
             _userService = userService;
+            _parkingSpaceService = parkingSpaceService;
         }
 
         public async Task<bool> AddBooking( BookingDTO booking )
@@ -34,9 +37,8 @@ namespace GarageProject.Service
                     throw new Exception("Booking's user was not found");
                 }
 
-                var parkingSpaceService = _serviceProvider.GetService<IParkingSpaceService>();
                 var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-                if ( parkingSpaceService == null || dateTimeConverter == null )
+                if ( dateTimeConverter == null )
                 {
                     throw new Exception( "Dependency injection failed." );
                 }
@@ -44,13 +46,24 @@ namespace GarageProject.Service
                 var startDateParsed = dateTimeConverter.Convert(booking.Start);
                 var endDateParsed = dateTimeConverter.Convert( booking.End );
 
-                var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange(startDateParsed, endDateParsed);
-                if( availableParkingSpaces == null || availableParkingSpaces.Count() == 0 ) 
+                ParkingSpace? parkingSpace;
+
+                if ( booking.ParkingSpace != null && await IsParkingSpaceFree( booking.ParkingSpace, startDateParsed, endDateParsed ) )
                 {
-                    throw new Exception( "There is no available parking space in the requested time range." );
+                    parkingSpace = booking.ParkingSpace;
+                }
+                else
+                {
+                    //we find a suitable parking space
+                    var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
+                    if ( availableParkingSpaces == null || availableParkingSpaces.Count() == 0 )
+                    {
+                        throw new Exception( "There are no available parking spaces in the requested time range." );
+                    }
+                    parkingSpace = availableParkingSpaces.First();
                 }
 
-                Booking newBooking = new Booking(user, availableParkingSpaces.First(), startDateParsed, endDateParsed);
+                Booking newBooking = new Booking(user, parkingSpace, startDateParsed, endDateParsed);
                 await _context.Bookings.AddAsync( newBooking );
                 await _context.SaveChangesAsync();
                 return true;
@@ -147,12 +160,7 @@ namespace GarageProject.Service
 
         public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange(DateTime startDate, DateTime endDate )
         {
-            var parkingSpaceService = _serviceProvider.GetService<IParkingSpaceService>();
-            if ( parkingSpaceService == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            var parkingSpaces = await parkingSpaceService.GetAllParkingSpaces();
+            var parkingSpaces = await _parkingSpaceService.GetAllParkingSpaces();
             var bookingsForDates = await GetBookingsByDates( startDate, endDate );
             var listOfParkingSpacesInvolved = bookingsForDates?.Select( b => b.ParkingSpace ).Distinct().ToList();
 
@@ -180,6 +188,12 @@ namespace GarageProject.Service
 
         public async Task<bool> IsParkingSpaceFree(ParkingSpace space, DateTime start, DateTime end, long? bookingId = null)
         {
+            var reassurance = await _parkingSpaceService.GetParkingSpaceById( space.Id );
+            if( reassurance == null )
+            {
+                throw new InvalidOperationException( $"The provided parking space with id ${space.Id} was not found in the database." );
+            }
+                
             var bookings = await GetBookingsByDates( start, end );
             var bookingsWithSearchedSpace = bookings?.Where( b => b.ParkingSpace.Equals( space ) );
 
@@ -205,9 +219,8 @@ namespace GarageProject.Service
                     throw new Exception( "Booking's user was not found" );
                 }
 
-                var parkingSpaceService = _serviceProvider.GetService<IParkingSpaceService>();
                 var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-                if ( parkingSpaceService == null || dateTimeConverter == null )
+                if ( dateTimeConverter == null )
                 {
                     throw new Exception( "Dependency injection failed." );
                 }
