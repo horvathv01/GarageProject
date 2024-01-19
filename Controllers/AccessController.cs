@@ -28,10 +28,8 @@ public class AccessController : ControllerBase
     public async Task<IActionResult> RegisterUser([FromBody] UserDTO user)
     {
         var registeredUser = await _userService.GetUserByEmail(user.Email);
-        Console.WriteLine(user);
         if (registeredUser != null)
         {
-            Console.WriteLine(registeredUser);
             return Conflict("This email has already been registered.");
         }
 

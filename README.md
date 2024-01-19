@@ -14,8 +14,8 @@ POST /logout
 /user
 
 GET : gets all users (returns List<UserDTO>?)
-GET /{id}: gets user by id (returns UserDTO)
-GET /email/{email}: gets user by email (returns UserDTO)
+GET /{id}: gets user by id (returns UserDTO?)
+GET /email/{email}: gets user by email (returns UserDTO?)
 GET /allmanagers: gets all managers (retuns List<UserDTO>)
 PUT /{id}: updates user (UserDTO in body, returns IActionResult)
 DELETE /{id}: deletes user (returns IActionResult)

@@ -14,15 +14,15 @@ namespace GarageProject.Service
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IParkingSpaceService _parkingSpaceService;
-        
 
-        public BookingService( 
-            GarageProjectContext context, 
-            IServiceProvider serviceProvider, 
-            IUserService userService, 
-            IParkingSpaceService parkingSpaceService ) 
-        { 
-            _context = context; 
+
+        public BookingService(
+            GarageProjectContext context,
+            IServiceProvider serviceProvider,
+            IUserService userService,
+            IParkingSpaceService parkingSpaceService )
+        {
+            _context = context;
             _serviceProvider = serviceProvider;
             _userService = userService;
             _parkingSpaceService = parkingSpaceService;
@@ -30,56 +30,49 @@ namespace GarageProject.Service
 
         public async Task<bool> AddBooking( BookingDTO booking )
         {
-            try
+            var user = await _userService.GetUserById( booking.User.Id );
+            if ( user == null )
             {
-                var user = await _userService.GetUserById( booking.User.Id );
-                if(user == null )
-                {
-                    throw new Exception("Booking's user was not found");
-                }
-
-                var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-                if ( dateTimeConverter == null )
-                {
-                    throw new Exception( "Dependency injection failed." );
-                }
-
-                var startDateParsed = dateTimeConverter.Convert(booking.Start);
-                var endDateParsed = dateTimeConverter.Convert( booking.End );
-
-                ParkingSpace? parkingSpace;
-
-                if ( booking.ParkingSpace != null && await IsParkingSpaceFree( booking.ParkingSpace, startDateParsed, endDateParsed ) )
-                {
-                    parkingSpace = booking.ParkingSpace;
-                }
-                else
-                {
-                    //we find a suitable parking space
-                    var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
-                    if ( availableParkingSpaces == null || availableParkingSpaces.Count() == 0 )
-                    {
-                        throw new Exception( "There are no available parking spaces in the requested time range." );
-                    }
-                    parkingSpace = availableParkingSpaces.First();
-                }
-
-                Booking newBooking = new Booking(user, parkingSpace, startDateParsed, endDateParsed);
-                await _context.Bookings.AddAsync( newBooking );
-                await _context.SaveChangesAsync();
-                return true;
+                throw new Exception( "Booking's user was not found" );
             }
-            catch
+
+            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+            if ( dateTimeConverter == null )
             {
-                throw;
+                throw new Exception( "Dependency injection failed." );
             }
+
+            var startDateParsed = dateTimeConverter.Convert( booking.Start );
+            var endDateParsed = dateTimeConverter.Convert( booking.End );
+
+            ParkingSpace? parkingSpace;
+
+            if ( booking.ParkingSpace != null && await IsParkingSpaceFree( booking.ParkingSpace, startDateParsed, endDateParsed ) )
+            {
+                parkingSpace = booking.ParkingSpace;
+            }
+            else
+            {
+                //we find a suitable parking space
+                var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
+                if ( availableParkingSpaces == null || availableParkingSpaces.Count() == 0 )
+                {
+                    throw new Exception( "There are no available parking spaces in the requested time range." );
+                }
+                parkingSpace = availableParkingSpaces.First();
+            }
+
+            Booking newBooking = new Booking( user, parkingSpace, startDateParsed, endDateParsed );
+            await _context.Bookings.AddAsync( newBooking );
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<IEnumerable<Booking>?> GetAllBookings()
         {
             return await _context.Bookings
-                .Include(b => b.User)
-                .Include(b => b.ParkingSpace)
+                .Include( b => b.User )
+                .Include( b => b.ParkingSpace )
                 .ToListAsync();
         }
 
@@ -97,15 +90,15 @@ namespace GarageProject.Service
             var startDateParsed = dateTimeConverter.Convert( startDate );
             var endDateParsed = dateTimeConverter.Convert( endDate );
 
-            return await GetBookingsByDates(startDateParsed, endDateParsed );
+            return await GetBookingsByDates( startDateParsed, endDateParsed );
         }
 
         public async Task<IEnumerable<Booking>?> GetBookingsByDates( DateTime startDate, DateTime endDate )
         {
-            return await _context.Bookings.Where(b =>
+            return await _context.Bookings.Where( b =>
             ( b.Start <= endDate && b.End >= startDate ) ||
             ( startDate <= b.End && endDate >= b.Start ) ||
-            ( b.Start >= startDate && b.End <= endDate ))
+            ( b.Start >= startDate && b.End <= endDate ) )
                 .Include( b => b.User )
                 .Include( b => b.ParkingSpace )
                 .ToListAsync();
@@ -141,7 +134,7 @@ namespace GarageProject.Service
             var startDateParsed = dateTimeConverter.Convert( startDate );
             var endDateParsed = dateTimeConverter.Convert( endDate );
 
-            return await GetBookingsByUser(user, startDateParsed, endDateParsed );
+            return await GetBookingsByUser( user, startDateParsed, endDateParsed );
         }
 
         public async Task<IEnumerable<Booking>?> GetBookingsByUser( User user, DateTime startDate, DateTime endDate )
@@ -149,7 +142,7 @@ namespace GarageProject.Service
             return await _context.Bookings.Where( b =>
             ( b.UserId == user.Id && b.Start <= endDate && b.End >= startDate ) ||
             ( b.UserId == user.Id && startDate <= b.End && endDate >= b.Start ) ||
-            ( b.UserId == user.Id && b.Start >= startDate && b.End <= endDate ))
+            ( b.UserId == user.Id && b.Start >= startDate && b.End <= endDate ) )
                 .Include( b => b.User )
                 .Include( b => b.ParkingSpace )
                 .ToListAsync();
@@ -157,7 +150,7 @@ namespace GarageProject.Service
 
         public async Task<IEnumerable<Booking>?> GetListOfBookings( List<long> ids )
         {
-            return await _context.Bookings.Where(b => ids.Contains(b.Id ) )
+            return await _context.Bookings.Where( b => ids.Contains( b.Id ) )
                 .Include( b => b.User )
                 .Include( b => b.ParkingSpace )
                 .ToListAsync();
@@ -170,7 +163,7 @@ namespace GarageProject.Service
             return await GetAvailableParkingSpacesForTimeRange( startDate, endDate );
         }
 
-        public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange(DateTime startDate, DateTime endDate )
+        public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange( DateTime startDate, DateTime endDate )
         {
             var parkingSpaces = await _parkingSpaceService.GetAllParkingSpaces();
             var bookingsForDates = await GetBookingsByDates( startDate, endDate );
@@ -231,24 +224,24 @@ namespace GarageProject.Service
             var startDateParsed = dateTimeConverter.Convert( startDate );
             var endDateParsed = dateTimeConverter.Convert( endDate );
 
-            return await GetAvailableParkingSpacesForTimeRange(startDateParsed, endDateParsed );
+            return await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
         }
 
-        public async Task<bool> IsParkingSpaceFree(ParkingSpace space, DateTime start, DateTime end, long? bookingId = null)
+        public async Task<bool> IsParkingSpaceFree( ParkingSpace space, DateTime start, DateTime end, long? bookingId = null )
         {
             var reassurance = await _parkingSpaceService.GetParkingSpaceById( space.Id );
-            if( reassurance == null )
+            if ( reassurance == null )
             {
                 throw new InvalidOperationException( $"The provided parking space with id ${space.Id} was not found in the database." );
             }
-                
+
             var bookings = await GetBookingsByDates( start, end );
             var bookingsWithSearchedSpace = bookings?.Where( b => b.ParkingSpace != null && b.ParkingSpace.Equals( space ) );
 
-            if( bookingsWithSearchedSpace != null && bookingsWithSearchedSpace.Count() > 0 )
+            if ( bookingsWithSearchedSpace != null && bookingsWithSearchedSpace.Count() > 0 )
             {
                 //if it is the original booking which occupies the desired space
-                if( bookingId != null && bookingsWithSearchedSpace.Count() == 1 && bookingId == bookingsWithSearchedSpace.First().Id )
+                if ( bookingId != null && bookingsWithSearchedSpace.Count() == 1 && bookingId == bookingsWithSearchedSpace.First().Id )
                 {
                     return true;
                 }
@@ -283,15 +276,15 @@ namespace GarageProject.Service
                 var endDateParsed = dateTimeConverter.Convert( newBooking.End );
 
                 ParkingSpace? parkingSpace;
-                
-                if( newBooking.ParkingSpace != null && await IsParkingSpaceFree( newBooking.ParkingSpace, startDateParsed, endDateParsed, oldBooking.Id ) )
+
+                if ( newBooking.ParkingSpace != null && await IsParkingSpaceFree( newBooking.ParkingSpace, startDateParsed, endDateParsed, oldBooking.Id ) )
                 {
                     parkingSpace = newBooking.ParkingSpace;
                 }
                 else
                 {
                     //we find a suitable parking space
-                    var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange(startDateParsed, endDateParsed);
+                    var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
                     if ( availableParkingSpaces == null || availableParkingSpaces.Count() == 0 )
                     {
                         throw new Exception( "There are no available parking spaces in the requested time range." );
@@ -303,7 +296,7 @@ namespace GarageProject.Service
                 oldBooking.ParkingSpace = parkingSpace;
                 oldBooking.Start = startDateParsed;
                 oldBooking.End = endDateParsed;
-                
+
                 _context.Update( oldBooking );
                 await _context.SaveChangesAsync();
                 return true;
@@ -322,7 +315,7 @@ namespace GarageProject.Service
             {
                 throw new InvalidOperationException( $"Booking with id {id} was not found." );
             }
-            
+
             bool canHandle = IsUserAuthorizedToHandleBooking( user, booking );
             if ( !canHandle )
             {
