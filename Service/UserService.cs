@@ -68,10 +68,10 @@ public class UserService : IUserService
         var user = await _context.Users
             .Include( u => u.Bookings )
             .FirstOrDefaultAsync( cli => cli.Email == email );
-        if ( user != null && user.Type == UserType.Manager )
-        {
-            return user as Manager;
-        }
+        //if ( user != null && user.Type == UserType.Manager )
+        //{
+        //    return user as Manager;
+        //}
         return user;
     }
 
