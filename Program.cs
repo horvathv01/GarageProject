@@ -13,13 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins", builder =>
-    {
-        builder.AllowAnyMethod()
+    options.AddDefaultPolicy(
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000", "http://192.168.4.80:3000")
                 .AllowAnyHeader()
-                .SetIsOriginAllowed(origin => true) // allow any origin
-                .AllowCredentials(); // allow credentials
-});
+                .AllowAnyMethod()
+                .AllowCredentials();
+        });
 });
 
 
@@ -74,7 +75,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAllOrigins");
+app.UseCors();
 
 //app.UseHttpsRedirection();
 app.UseAuthentication();
