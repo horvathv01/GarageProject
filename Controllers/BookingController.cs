@@ -17,136 +17,233 @@ namespace GarageProject.Controllers
         private readonly IUserService _userService;
         private readonly IBookingConverter _converter;
 
-        public BookingController( 
-            IBookingService bookingService, 
+        public BookingController(
+            IBookingService bookingService,
             IUserService userService,
             IBookingConverter converter
-            ) 
+            )
         {
             _bookingService = bookingService;
             _userService = userService;
             _converter = converter;
         }
 
-        [HttpGet("{id}")]
+        [HttpGet( "{id}" )]
         //[Authorize]
-        public async Task<BookingDTO?> GetBookingById(long id )
+        public async Task<IActionResult> GetBookingById( long id )
         {
-            var result = await _bookingService.GetBookingById( id );
-            return _converter.ConvertToBookingDTO( result );
+            try
+            {
+                var query = await _bookingService.GetBookingById( id );
+                var result = _converter.ConvertToBookingDTO( query );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
         [HttpGet]
         //[Authorize]
-        public async Task<IEnumerable<BookingDTO>?> GetAllBookings()
+        public async Task<IActionResult> GetAllBookings()
         {
-            var result = await _bookingService.GetAllBookings();
-            return _converter.ConvertToBookingDTOIEnumerable( result );
+            try
+            {
+                var query = await _bookingService.GetAllBookings();
+                var result = _converter.ConvertToBookingDTOIEnumerable( query );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
-        [HttpGet("user/{userId}")]
+        [HttpGet( "user/{userId}" )]
         //[Authorize]
-        public async Task<IEnumerable<BookingDTO>?> GetBookingsByUser(long userId)
+        public async Task<IActionResult> GetBookingsByUser( long userId )
         {
-            var result = await _bookingService.GetBookingsByUser( userId );
-            return _converter.ConvertToBookingDTOIEnumerable( result );
+            try
+            {
+                var query = await _bookingService.GetBookingsByUser( userId );
+                var result = _converter.ConvertToBookingDTOIEnumerable( query );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
         [HttpGet( "dates" )]
         //[Authorize]
-        public async Task<IEnumerable<BookingDTO>?> GetBookingsByDates(
+        public async Task<IActionResult> GetBookingsByDates(
         [FromQuery] string startDate,
         [FromQuery] string endDate )
         {
-            var result = await _bookingService.GetBookingsByDates( startDate, endDate );
-            return _converter.ConvertToBookingDTOIEnumerable( result );
+            try
+            {
+                var query = await _bookingService.GetBookingsByDates( startDate, endDate );
+                var result = _converter.ConvertToBookingDTOIEnumerable( query );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
-        [HttpGet("user/dates")]
+        [HttpGet( "user/dates" )]
         //[Authorize]
-        public async Task<IEnumerable<BookingDTO>?> GetBookingsByUserAndDates( 
+        public async Task<IActionResult> GetBookingsByUserAndDates(
         [FromQuery] long userId,
         [FromQuery] string startDate,
         [FromQuery] string endDate )
         {
-            var result = await _bookingService.GetBookingsByUser( userId, startDate, endDate );
-            return _converter.ConvertToBookingDTOIEnumerable( result );
+            try
+            {
+                var query = await _bookingService.GetBookingsByUser( userId, startDate, endDate );
+                var result = _converter.ConvertToBookingDTOIEnumerable( query );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
+
         }
 
-        [HttpGet("ids")]
+        [HttpGet( "ids" )]
         //[Authorize]
-        public async Task<IEnumerable<BookingDTO>?> GetBookingsByListOfIds([FromBody] List<long> ids)
+        public async Task<IActionResult> GetBookingsByListOfIds( [FromBody] List<long> ids )
         {
-            
-            var result = await _bookingService.GetListOfBookings( ids );
-            return _converter.ConvertToBookingDTOIEnumerable( result );
+            try
+            {
+                var query = await _bookingService.GetListOfBookings( ids );
+                var result = _converter.ConvertToBookingDTOIEnumerable( query );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
+
         }
 
-        [HttpGet("emptyspaces/date/{date}")]
+        [HttpGet( "emptyspaces/date/{date}" )]
         //[Authorize]
-        public async Task<IEnumerable<ParkingSpace>?> GetEmptyParkingSpaces(string date)
+        public async Task<IActionResult> GetEmptyParkingSpaces( string date )
         {
-            return await _bookingService.GetAvailableParkingSpacesForDate( date );
+            try
+            {
+                var result = await _bookingService.GetAvailableParkingSpacesForDate( date );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
-        [HttpGet("emptyspaces/daterange")]
+        [HttpGet( "emptyspaces/daterange" )]
         //[Authorize]
-        public async Task<IEnumerable<ParkingSpace>?> GetEmptyParkingSpacesForTimeRange(
+        public async Task<IActionResult> GetEmptyParkingSpacesForTimeRange(
         [FromQuery] string startDate,
         [FromQuery] string endDate )
         {
-            return await _bookingService.GetAvailableParkingSpacesForTimeRange( startDate, endDate );
+            try
+            {
+                var result = await _bookingService.GetAvailableParkingSpacesForTimeRange( startDate, endDate );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
-        [HttpGet("emptyspaces/amount/{date}")]
+        [HttpGet( "emptyspaces/amount/{date}" )]
         //[Authorize]
-        public async Task<int> GetAmountOfEmptySpacesFoRDate( string date )
+        public async Task<IActionResult> GetAmountOfEmptySpacesFoRDate( string date )
         {
-            return await _bookingService.GetNumberOfEmptySpacesForDate( date );
+            try
+            {
+                var result = await _bookingService.GetNumberOfEmptySpacesForDate( date );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
 
         [HttpPost]
         //[Authorize]
-        public async Task<IActionResult> AddBooking([FromBody] BookingDTO booking )
+        public async Task<IActionResult> AddBooking( [FromBody] BookingDTO booking )
         {
-            var result = await _bookingService.AddBooking(booking);
-            if ( result )
+            try
             {
-                return Ok("Adding booking was successful.");
+                var result = await _bookingService.AddBooking( booking );
+                if ( result )
+                {
+                    return Ok( "Adding booking was successful." );
+                }
+                else
+                {
+                    return BadRequest( "Adding booking failed." );
+                }
             }
-            return BadRequest("Something went wrong.");
-        }
-
-        [HttpPut("{id}")]
-        //[Authorize]
-        public async Task<IActionResult> UpdateBooking(long id, [FromBody] BookingDTO newBooking)
-        {
-            var user = await GetLoggedInUser();
-            var result = await _bookingService.UpdateBooking( id, newBooking, user );
-            if ( result )
+            catch ( Exception ex )
             {
-                return Ok( "Updating booking was successful." );
-            }
-            else
-            {
-                return BadRequest( "Updating booking failed." );
+                return BadRequest( ex.Message );
             }
         }
 
-        [HttpDelete("{id}")]
+        [HttpPut( "{id}" )]
         //[Authorize]
-        public async Task<IActionResult> DeleteBooking(long id)
+        public async Task<IActionResult> UpdateBooking( long id, [FromBody] BookingDTO newBooking )
         {
-            var user = await GetLoggedInUser();
-            var result = await _bookingService.DeleteBooking( id, user );
-            if ( result )
+            try
             {
-                return Ok("Booking deletion was successful.");
+                var user = await GetLoggedInUser();
+                var result = await _bookingService.UpdateBooking( id, newBooking, user );
+                if ( result )
+                {
+                    return Ok( "Updating booking was successful." );
+                }
+                else
+                {
+                    return BadRequest( "Updating booking failed." );
+                }
             }
-            else
+            catch ( Exception ex )
             {
-                return BadRequest( "Booking deletion failed." );
+                return BadRequest( ex.Message );
+            }
+        }
+
+        [HttpDelete( "{id}" )]
+        //[Authorize]
+        public async Task<IActionResult> DeleteBooking( long id )
+        {
+            try
+            {
+                var user = await GetLoggedInUser();
+                var result = await _bookingService.DeleteBooking( id, user );
+                if ( result )
+                {
+                    return Ok( "Booking deletion was successful." );
+                }
+                else
+                {
+                    return BadRequest( "Booking deletion failed." );
+                }
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
             }
         }
 

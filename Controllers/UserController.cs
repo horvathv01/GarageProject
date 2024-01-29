@@ -25,36 +25,66 @@ public class UserController : ControllerBase
 
     [HttpGet( "{id}" )]
     //[Authorize]
-    public async Task<UserDTO?> GetUser( long id )
+    public async Task<IActionResult> GetUser( long id )
     {
-        var result = await _userService.GetUserById( id );
-        return _converter.ConvertToUserDTO( result );
+        try
+        {
+            var query = await _userService.GetUserById( id );
+            var result = _converter.ConvertToUserDTO( query );
+            return Ok( result );
+        }
+        catch ( Exception ex )
+        {
+            return BadRequest( ex.Message );
+        }
     }
 
     [HttpGet]
     //[Authorize]
-    public async Task<IEnumerable<UserDTO>?> GetAllUsers()
+    public async Task<IActionResult> GetAllUsers()
     {
-
-        var result = await _userService.GetAllUsers();
-        return _converter.ConvertToUserDTOIEnumerable( result );
+        try
+        {
+            var query = await _userService.GetAllUsers();
+            var result = _converter.ConvertToUserDTOIEnumerable( query );
+            return Ok( result );
+        }
+        catch ( Exception ex )
+        {
+            return BadRequest( ex.Message );
+        }
     }
 
     [HttpGet( "email/{email}" )]
     //[Authorize]
-    public async Task<UserDTO?> GetUserByEmail( string email )
+    public async Task<IActionResult> GetUserByEmail( string email )
     {
-
-        var result = await _userService.GetUserByEmail( email );
-        return _converter.ConvertToUserDTO( result );
+        try
+        {
+            var query = await _userService.GetUserByEmail( email );
+            var result = _converter.ConvertToUserDTO( query );
+            return Ok( result );
+        }
+        catch ( Exception ex )
+        {
+            return BadRequest( ex.Message );
+        }
     }
 
     [HttpGet( "allmanagers" )]
     //[Authorize]
-    public async Task<IEnumerable<UserDTO>?> GetAllManagers()
+    public async Task<IActionResult> GetAllManagers()
     {
-        var result = await _userService.GetAllManagers();
-        return _converter.ConvertToUserDTOIEnumerable( result );
+        try
+        {
+            var query = await _userService.GetAllManagers();
+            var result = _converter.ConvertToUserDTOIEnumerable( query );
+            return Ok( result );
+        }
+        catch ( Exception ex )
+        {
+            return BadRequest( ex.Message );
+        }
     }
 
 
@@ -62,27 +92,41 @@ public class UserController : ControllerBase
     [Authorize]
     public async Task<IActionResult> UpdateUser( [FromBody] UserDTO newUser, long id )
     {
-        var loggedInUser = await GetLoggedInUser();
-        var result = await _userService.UpdateUser( id, newUser, loggedInUser );
-        if ( result )
+        try
         {
-            return Ok( $"User with id {id} has been updated successfully" );
-        }
+            var loggedInUser = await GetLoggedInUser();
+            var result = await _userService.UpdateUser( id, newUser, loggedInUser );
+            if ( result )
+            {
+                return Ok( $"User with id {id} has been updated successfully" );
+            }
 
-        return BadRequest( "Something went wrong" );
+            return BadRequest( "Something went wrong" );
+        }
+        catch ( Exception ex )
+        {
+            return BadRequest( ex.Message );
+        }
     }
 
     [HttpDelete( "{id}" )]
     [Authorize]
     public async Task<IActionResult> DeleteUser( long id )
     {
-        var user = await GetLoggedInUser();
-        var result = await _userService.DeleteUser( id, user );
-        if ( result )
+        try
         {
-            return Ok( $"User with id {id} has been successfully deleted." );
+            var user = await GetLoggedInUser();
+            var result = await _userService.DeleteUser( id, user );
+            if ( result )
+            {
+                return Ok( $"User with id {id} has been successfully deleted." );
+            }
+            return BadRequest( "Something went wrong" );
         }
-        return BadRequest( "Something went wrong" );
+        catch ( Exception ex )
+        {
+            return BadRequest( ex.Message );
+        }
     }
 
     private async Task<User?> GetLoggedInUser()

@@ -21,50 +21,88 @@ namespace PsychAppointments_API.Controllers
 
         [HttpGet( "{id}" )]
         //[Authorize]
-        public async Task<ParkingSpace?> GetParkingSpaceById( long id )
+        public async Task<IActionResult> GetParkingSpaceById( long id )
         {
-            return await _parkingSpaceService.GetParkingSpaceById( id );
+            try
+            {
+                var result = await _parkingSpaceService.GetParkingSpaceById( id );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
         [HttpGet]
         //[Authorize]
-        public async Task<IEnumerable<ParkingSpace>?> GetAllParkingSpaces( long id )
+        public async Task<IActionResult> GetAllParkingSpaces( long id )
         {
-            return await _parkingSpaceService.GetAllParkingSpaces();
+            try
+            {
+                var result = await _parkingSpaceService.GetAllParkingSpaces();
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
         [HttpGet( "ids" )]
         //[Authorize]
-        public async Task<IEnumerable<ParkingSpace>?> GetParkingSpacesByListOfIds( [FromBody] List<long> ids )
+        public async Task<IActionResult> GetParkingSpacesByListOfIds( [FromBody] List<long> ids )
         {
-            return await _parkingSpaceService.GetListOfParkingSpaces( ids );
+            try
+            {
+                var result = await _parkingSpaceService.GetListOfParkingSpaces( ids );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
         [HttpPost]
         //[Authorize]
         public async Task<IActionResult> AddParkingSpace( [FromBody] ParkingSpace space )
         {
-            var result = await _parkingSpaceService.AddParkingSpace( space );
-            if ( result )
+            try
             {
-                return Ok( "Adding parking space was successful." );
+                var result = await _parkingSpaceService.AddParkingSpace( space );
+                if ( result )
+                {
+                    return Ok( "Adding parking space was successful." );
+                }
+                return BadRequest( "Something went wrong." );
             }
-            return BadRequest( "Something went wrong." );
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
         }
 
         [HttpPut( "{id}" )]
         //[Authorize]
-        public async Task<IActionResult> UpdateParkingSpace( long id, [FromBody] ParkingSpace newSpace)
+        public async Task<IActionResult> UpdateParkingSpace( long id, [FromBody] ParkingSpace newSpace )
         {
-            var user = await GetLoggedInUser();
-            var result = await _parkingSpaceService.UpdateParkingSpace( id, newSpace, user );
-            if ( result )
+            try
             {
-                return Ok( "Updating parking space was successful." );
+                var user = await GetLoggedInUser();
+                var result = await _parkingSpaceService.UpdateParkingSpace( id, newSpace, user );
+                if ( result )
+                {
+                    return Ok( "Updating parking space was successful." );
+                }
+                else
+                {
+                    return BadRequest( "Updating parking space failed." );
+                }
             }
-            else
+            catch ( Exception ex )
             {
-                return BadRequest( "Updating parking space failed." );
+                return BadRequest( ex.Message );
             }
         }
 
@@ -72,15 +110,22 @@ namespace PsychAppointments_API.Controllers
         //[Authorize]
         public async Task<IActionResult> DeleteParkingSpace( long id )
         {
-            var user = await GetLoggedInUser();
-            var result = await _parkingSpaceService.DeleteParkingSpace( id, user );
-            if ( result )
+            try
             {
-                return Ok( "Parking space deletion was successful." );
+                var user = await GetLoggedInUser();
+                var result = await _parkingSpaceService.DeleteParkingSpace( id, user );
+                if ( result )
+                {
+                    return Ok( "Parking space deletion was successful." );
+                }
+                else
+                {
+                    return BadRequest( "Parking space deletion failed." );
+                }
             }
-            else
+            catch ( Exception ex )
             {
-                return BadRequest( "Parking space deletion failed." );
+                return BadRequest( ex.Message );
             }
         }
 

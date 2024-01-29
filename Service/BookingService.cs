@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using GarageProject.Converters;
 using Microsoft.AspNetCore.Http.HttpResults;
 using GarageProject.Models.Enums;
+using PsychAppointments_API.Models;
 
 namespace GarageProject.Service
 {
@@ -33,7 +34,7 @@ namespace GarageProject.Service
             var user = await _userService.GetUserById( booking.User.Id );
             if ( user == null )
             {
-                throw new Exception( "Booking's user was not found" );
+                throw new BadHttpRequestException( "Booking's user was not found" );
             }
 
             var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
@@ -65,6 +66,7 @@ namespace GarageProject.Service
             Booking newBooking = new Booking( user, parkingSpace, startDateParsed, endDateParsed );
             await _context.Bookings.AddAsync( newBooking );
             await _context.SaveChangesAsync();
+
             return true;
         }
 
@@ -109,7 +111,7 @@ namespace GarageProject.Service
             var user = await _userService.GetUserById( userId );
             if ( user == null )
             {
-                throw new Exception( $"User with id {userId} not found" );
+                throw new BadHttpRequestException( $"User with id {userId} not found" );
             }
 
             return await _context.Bookings.Where( b => b.UserId == user.Id )
@@ -123,7 +125,7 @@ namespace GarageProject.Service
             var user = await _userService.GetUserById( userId );
             if ( user == null )
             {
-                throw new Exception( $"User with id {userId} not found" );
+                throw new BadHttpRequestException( $"User with id {userId} not found" );
             }
 
             var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
@@ -232,7 +234,7 @@ namespace GarageProject.Service
             var reassurance = await _parkingSpaceService.GetParkingSpaceById( space.Id );
             if ( reassurance == null )
             {
-                throw new InvalidOperationException( $"The provided parking space with id ${space.Id} was not found in the database." );
+                throw new BadHttpRequestException ($"The provided parking space with id ${space.Id} was not found in the database." );
             }
 
             var bookings = await GetBookingsByDates( start, end );
@@ -257,7 +259,7 @@ namespace GarageProject.Service
                 var oldBooking = await GetBookingById( id );
                 if ( oldBooking == null )
                 {
-                    throw new InvalidOperationException( $"Booking with id {id} not found." );
+                    throw new BadHttpRequestException( $"Booking with id {id} not found." );
                 }
 
                 bool canHandle = IsUserAuthorizedToHandleBooking( user, oldBooking );
@@ -269,7 +271,7 @@ namespace GarageProject.Service
                 var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
                 if ( dateTimeConverter == null )
                 {
-                    throw new Exception( "Dependency injection failed." );
+                   throw new Exception( "Dependency injection failed." );
                 }
 
                 var startDateParsed = dateTimeConverter.Convert( newBooking.Start );
@@ -313,7 +315,7 @@ namespace GarageProject.Service
             var booking = await GetBookingById( id );
             if ( booking == null )
             {
-                throw new InvalidOperationException( $"Booking with id {id} was not found." );
+                throw new BadHttpRequestException( $"Booking with id {id} was not found." );
             }
 
             bool canHandle = IsUserAuthorizedToHandleBooking( user, booking );

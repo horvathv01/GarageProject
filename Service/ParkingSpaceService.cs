@@ -16,16 +16,9 @@ namespace GarageProject.Service
 
         public async Task<bool> AddParkingSpace( ParkingSpace space )
         {
-            try
-            {
                 await _context.ParkingSpaces.AddAsync( space );
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch
-            {
-                throw;
-            }
         }
 
         public async Task<IEnumerable<ParkingSpace>?> GetAllParkingSpaces()
