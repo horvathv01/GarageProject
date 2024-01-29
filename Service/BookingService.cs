@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using GarageProject.Converters;
 using Microsoft.AspNetCore.Http.HttpResults;
 using GarageProject.Models.Enums;
-using PsychAppointments_API.Models;
+using GarageProject.Models;
 
 namespace GarageProject.Service
 {
