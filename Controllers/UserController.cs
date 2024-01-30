@@ -94,8 +94,8 @@ public class UserController : ControllerBase
     {
         try
         {
-            var loggedInUser = await GetLoggedInUser();
-            var result = await _userService.UpdateUser( id, newUser, loggedInUser );
+            var loggedInUserId = GetLoggedInUserId();
+            var result = await _userService.UpdateUser( id, newUser, loggedInUserId );
             if ( result )
             {
                 return Ok( $"User with id {id} has been updated successfully" );
@@ -115,8 +115,8 @@ public class UserController : ControllerBase
     {
         try
         {
-            var user = await GetLoggedInUser();
-            var result = await _userService.DeleteUser( id, user );
+            var loggedInUserId = GetLoggedInUserId();
+            var result = await _userService.DeleteUser( id, loggedInUserId );
             if ( result )
             {
                 return Ok( $"User with id {id} has been successfully deleted." );
@@ -129,10 +129,10 @@ public class UserController : ControllerBase
         }
     }
 
-    private async Task<User?> GetLoggedInUser()
+    private long GetLoggedInUserId()
     {
         long userId;
         long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
-        return await _userService.GetUserById( userId );
+        return userId;
     }
 }

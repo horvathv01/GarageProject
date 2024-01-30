@@ -13,14 +13,17 @@ public class UserService : IUserService
 {
     private readonly GarageProjectContext _context;
     private readonly IAccessUtilities _hasher;
+    private readonly IUserService _userService;
     private readonly IServiceProvider _serviceProvider;
     public UserService(
         GarageProjectContext context,
         IAccessUtilities hasher,
+        IUserService userService,
         IServiceProvider serviceProvider )
     {
         _context = context;
         _hasher = hasher;
+        _userService = userService;
         _serviceProvider = serviceProvider;
     }
 
@@ -102,8 +105,10 @@ public class UserService : IUserService
             .Union( managers );
     }
 
-    public async Task<bool> UpdateUser( long id, UserDTO newUser, User? loggedInUser = null )
+    public async Task<bool> UpdateUser( long id, UserDTO newUser, long loggedInUserId )
     {
+        var loggedInUser = await _userService.GetUserById( loggedInUserId );
+
         if ( loggedInUser == null )
         {
             throw new InvalidOperationException( "Logged in user could not be retrieved" );
@@ -156,8 +161,10 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> DeleteUser( long id, User? loggedInUser = null )
+    public async Task<bool> DeleteUser( long id, long loggedInUserId )
     {
+        var loggedInUser = await _userService.GetUserById( loggedInUserId );
+
         if ( !IsUserAuthorizedToHandleUser( loggedInUser, id ) )
         {
             throw new UnauthorizedAccessException( "You are not authorized to update this user." );

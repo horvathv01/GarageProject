@@ -12,6 +12,6 @@ public interface IManagerService
     
     Task<List<Manager>> GetListOfManagers(List<long> ids);
     
-    Task<bool> UpdateManager(long id, Manager manager);
-    Task<bool> UpdateManager(long id, UserDTO manager);
+    Task<bool> UpdateManager(long id, Manager manager, long loggedInUserId );
+    Task<bool> UpdateManager(long id, UserDTO manager, long loggedInUserId );
 }

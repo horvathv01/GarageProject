@@ -14,17 +14,14 @@ namespace GarageProject.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingService _bookingService;
-        private readonly IUserService _userService;
         private readonly IBookingConverter _converter;
 
         public BookingController(
             IBookingService bookingService,
-            IUserService userService,
             IBookingConverter converter
             )
         {
             _bookingService = bookingService;
-            _userService = userService;
             _converter = converter;
         }
 
@@ -207,8 +204,8 @@ namespace GarageProject.Controllers
         {
             try
             {
-                var user = await GetLoggedInUser();
-                var result = await _bookingService.UpdateBooking( id, newBooking, user );
+                var userId = GetLoggedInUserId();
+                var result = await _bookingService.UpdateBooking( id, newBooking, userId );
                 if ( result )
                 {
                     return Ok( "Updating booking was successful." );
@@ -230,8 +227,8 @@ namespace GarageProject.Controllers
         {
             try
             {
-                var user = await GetLoggedInUser();
-                var result = await _bookingService.DeleteBooking( id, user );
+                var userId = GetLoggedInUserId();
+                var result = await _bookingService.DeleteBooking( id, userId );
                 if ( result )
                 {
                     return Ok( "Booking deletion was successful." );
@@ -247,11 +244,11 @@ namespace GarageProject.Controllers
             }
         }
 
-        private async Task<User?> GetLoggedInUser()
+        private long GetLoggedInUserId()
         {
             long userId;
             long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
-            return await _userService.GetUserById( userId );
+            return userId;
         }
     }
 }
