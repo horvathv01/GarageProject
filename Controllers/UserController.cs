@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using GarageProject.Models;
 using GarageProject.Models.Enums;
 using GarageProject.Service;
-using PsychAppointments_API.Converters;
+using GarageProject.Converters;
 
 namespace GarageProject.Controllers;
 

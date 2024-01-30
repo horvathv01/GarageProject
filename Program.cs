@@ -5,9 +5,7 @@ using GarageProject.DAL;
 using GarageProject.Models;
 using GarageProject.Service;
 using GarageProject.Service.Factories;
-using GarageProject.Service;
 using GarageProject.Converters;
-using PsychAppointments_API.Converters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +44,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddDbContext<GarageProjectContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString( "GarageProjectConnection" ) ));
 
+builder.Services.AddSingleton<ILoggerService, LoggerService>();
 
 builder.Services.AddScoped<IAccessUtilities, AccessUtilities>();
 builder.Services.AddScoped<IHasherFactory, HasherFactory>();

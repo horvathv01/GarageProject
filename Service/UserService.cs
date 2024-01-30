@@ -13,22 +13,25 @@ public class UserService : IUserService
 {
     private readonly GarageProjectContext _context;
     private readonly IAccessUtilities _hasher;
-    private readonly IUserService _userService;
     private readonly IServiceProvider _serviceProvider;
     public UserService(
         GarageProjectContext context,
         IAccessUtilities hasher,
-        IUserService userService,
         IServiceProvider serviceProvider )
     {
         _context = context;
         _hasher = hasher;
-        _userService = userService;
         _serviceProvider = serviceProvider;
     }
 
     public async Task<bool> AddUser( UserDTO user )
     {
+        var registeredUser = await GetUserByEmail( user.Email );
+        if ( registeredUser != null )
+        {
+            throw new InvalidOperationException( "This email has already been registered." );
+        }
+
         string password = _hasher.HashPassword( user.Password, user.Email );
 
         var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
@@ -107,7 +110,7 @@ public class UserService : IUserService
 
     public async Task<bool> UpdateUser( long id, UserDTO newUser, long loggedInUserId )
     {
-        var loggedInUser = await _userService.GetUserById( loggedInUserId );
+        var loggedInUser = await GetUserById( loggedInUserId );
 
         if ( loggedInUser == null )
         {
@@ -163,7 +166,7 @@ public class UserService : IUserService
 
     public async Task<bool> DeleteUser( long id, long loggedInUserId )
     {
-        var loggedInUser = await _userService.GetUserById( loggedInUserId );
+        var loggedInUser = await GetUserById( loggedInUserId );
 
         if ( !IsUserAuthorizedToHandleUser( loggedInUser, id ) )
         {

@@ -5,7 +5,6 @@ using GarageProject.Models.Enums;
 using GarageProject.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using PsychAppointments_API.Converters;
 using System.Security.Claims;
 
 namespace GarageProject.Controllers
