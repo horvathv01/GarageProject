@@ -11,7 +11,7 @@ namespace PsychAppointments_API.Service
             return Dns.GetHostEntry( Dns.GetHostName() )
             .AddressList
             .FirstOrDefault( ip => ip.AddressFamily == AddressFamily.InterNetwork )
-            ?? IPAddress.Parse( "localhost" );
+            ?? IPAddress.Parse( "127.0.0.1" );
         }
 
         public static string GenerateURL( URLType? type = URLType.http, IPAddress? address = null, string? port = "5082" )
