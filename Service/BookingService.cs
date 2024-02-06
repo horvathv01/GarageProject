@@ -269,7 +269,7 @@ namespace GarageProject.Service
 
             var day = dateTimeConverter.Convert( date );
 
-            if( booking.Start > day || booking.End < day )
+            if( booking.Start.Date > day.Date || booking.End.Date < day.Date )
             {
                 throw new InvalidOperationException( $"The booking with id {bookingId} does not include the day you provided ({day.Year}. {day.Month} {day.Day}). " +
                     $"Booking starts on {booking.Start.Year}. {booking.Start.Month} {booking.Start.Day}th at {booking.Start.Hour}:{booking.Start.Minute} and ends on" +
