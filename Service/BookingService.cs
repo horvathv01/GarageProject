@@ -6,6 +6,7 @@ using GarageProject.Converters;
 using Microsoft.AspNetCore.Http.HttpResults;
 using GarageProject.Models.Enums;
 using GarageProject.Models;
+using System.Globalization;
 
 namespace GarageProject.Service
 {
@@ -252,10 +253,65 @@ namespace GarageProject.Service
             return true;
         }
 
+        public async Task<bool> RemoveDayFromBooking( long bookingId, string date, long userId )
+        {
+            var booking = await GetBookingById( bookingId );
+            if ( booking == null )
+            {
+                throw new BadHttpRequestException( $"Booking with id {bookingId} not found." );
+            }
+
+            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+            if ( dateTimeConverter == null )
+            {
+                throw new Exception( "Dependency injection failed." );
+            }
+
+            var day = dateTimeConverter.Convert( date );
+
+            if( booking.Start > day || booking.End < day )
+            {
+                throw new InvalidOperationException( $"The booking with id {bookingId} does not include the day you provided ({day.Year}. {day.Month} {day.Day}). " +
+                    $"Booking starts on {booking.Start.Year}. {booking.Start.Month} {booking.Start.Day}th at {booking.Start.Hour}:{booking.Start.Minute} and ends on" +
+                    $"{booking.End.Year}. {booking.End.Month} {booking.End.Day}th at {booking.End.Hour}:{booking.End.Minute}" );
+            }
+
+            if( booking.Start.Date == booking.End.Date && booking.Start.Date == day.Date )
+            {
+                await DeleteBooking( bookingId, userId );
+                return true;
+            }
+
+            var modifiedDTO = new BookingDTO( booking );
+            var newStart = day.AddDays( 1 );
+            var newEnd = day.AddDays( -1 );
+            newStart = new DateTime(newStart.Year, newStart.Month, newStart.Day, 0, 0, 0);
+            newEnd = new DateTime( newEnd.Year, newEnd.Month, newEnd.Day, 23, 59, 0 );
+            if ( booking.Start.Date == day.Date )
+            {
+                modifiedDTO.Start = newStart.ToString( "yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture );
+                await UpdateBooking( bookingId, modifiedDTO, userId );
+                return true;
+            }
+
+            if ( booking.End.Date == day.Date )
+            {
+                modifiedDTO.End = newEnd.ToString( "yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture );
+                await UpdateBooking( bookingId, modifiedDTO, userId );
+                return true;
+            }
+
+            modifiedDTO.End = newEnd.ToString( "yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture );
+            await UpdateBooking ( bookingId, modifiedDTO, userId );
+
+            var newBooking = new BookingDTO( booking );
+            newBooking.Start = newStart.ToString( "yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture );
+            await AddBooking( newBooking );
+            return true;
+        }
+
         public async Task<bool> UpdateBooking( long id, BookingDTO newBooking, long userId )
         {
-            try
-            {
                 var oldBooking = await GetBookingById( id );
                 if ( oldBooking == null )
                 {
@@ -303,11 +359,6 @@ namespace GarageProject.Service
                 _context.Update( oldBooking );
                 await _context.SaveChangesAsync();
                 return true;
-            }
-            catch
-            {
-                throw;
-            }
         }
 
         public async Task<bool> DeleteBooking( long id, long userId )
