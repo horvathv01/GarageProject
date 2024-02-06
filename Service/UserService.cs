@@ -26,6 +26,12 @@ public class UserService : IUserService
 
     public async Task<bool> AddUser( UserDTO user )
     {
+        var registeredUser = await GetUserByEmail( user.Email );
+        if ( registeredUser != null )
+        {
+            throw new InvalidOperationException( "This email has already been registered." );
+        }
+
         string password = _hasher.HashPassword( user.Password, user.Email );
 
         var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
@@ -102,8 +108,10 @@ public class UserService : IUserService
             .Union( managers );
     }
 
-    public async Task<bool> UpdateUser( long id, UserDTO newUser, User? loggedInUser = null )
+    public async Task<bool> UpdateUser( long id, UserDTO newUser, long loggedInUserId )
     {
+        var loggedInUser = await GetUserById( loggedInUserId );
+
         if ( loggedInUser == null )
         {
             throw new InvalidOperationException( "Logged in user could not be retrieved" );
@@ -156,8 +164,10 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<bool> DeleteUser( long id, User? loggedInUser = null )
+    public async Task<bool> DeleteUser( long id, long loggedInUserId )
     {
+        var loggedInUser = await GetUserById( loggedInUserId );
+
         if ( !IsUserAuthorizedToHandleUser( loggedInUser, id ) )
         {
             throw new UnauthorizedAccessException( "You are not authorized to update this user." );

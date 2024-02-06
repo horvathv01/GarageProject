@@ -5,18 +5,30 @@ using GarageProject.DAL;
 using GarageProject.Models;
 using GarageProject.Service;
 using GarageProject.Service.Factories;
-using GarageProject.Service;
 using GarageProject.Converters;
-using PsychAppointments_API.Converters;
+using System.Net;
+using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+
+    if(ip == null )
+    {
+        builder.WebHost.UseUrls( "http://localhost:5082" );
+    } else
+    {
+        var https = $"https://{ip}:7021";
+        var http = $"http://{ip}:5082";
+        builder.WebHost.UseUrls(https, http);
+    }
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", "http://192.168.4.80:3000", "http://192.168.4.144:3000")
+            policy.WithOrigins("http://localhost:3000", $"http://{ip}:3000")
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();
@@ -46,6 +58,7 @@ builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddDbContext<GarageProjectContext>(options => 
     options.UseNpgsql(builder.Configuration.GetConnectionString( "GarageProjectConnection" ) ));
 
+builder.Services.AddSingleton<ILoggerService, LoggerService>();
 
 builder.Services.AddScoped<IAccessUtilities, AccessUtilities>();
 builder.Services.AddScoped<IHasherFactory, HasherFactory>();

@@ -252,7 +252,7 @@ namespace GarageProject.Service
             return true;
         }
 
-        public async Task<bool> UpdateBooking( long id, BookingDTO newBooking, User? user = null )
+        public async Task<bool> UpdateBooking( long id, BookingDTO newBooking, long userId )
         {
             try
             {
@@ -262,8 +262,9 @@ namespace GarageProject.Service
                     throw new BadHttpRequestException( $"Booking with id {id} not found." );
                 }
 
+                var user = await _userService.GetUserById( userId );
                 bool canHandle = IsUserAuthorizedToHandleBooking( user, oldBooking );
-                if ( !canHandle || user == null )
+                if ( !canHandle || user == null ) //method actually checks for null, this is only to suppress alert in IDE for possible null value issue
                 {
                     throw new UnauthorizedAccessException( "You are not authorized to update this booking." );
                 }
@@ -309,9 +310,9 @@ namespace GarageProject.Service
             }
         }
 
-        public async Task<bool> DeleteBooking( long id, User? user = null )
+        public async Task<bool> DeleteBooking( long id, long userId )
         {
-
+            var user = await _userService.GetUserById( userId );
             var booking = await GetBookingById( id );
             if ( booking == null )
             {

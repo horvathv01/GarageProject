@@ -8,10 +8,12 @@ namespace GarageProject.Service
     public class ParkingSpaceService : IParkingSpaceService
     {
         private readonly GarageProjectContext _context;
+        private readonly IUserService _userService;
 
-        public ParkingSpaceService( GarageProjectContext context )
+        public ParkingSpaceService( GarageProjectContext context, IUserService userService )
         {
             _context = context;
+            _userService = userService;
         }
 
         public async Task<bool> AddParkingSpace( ParkingSpace space )
@@ -36,8 +38,10 @@ namespace GarageProject.Service
             return await _context.ParkingSpaces.Where( s => ids.Contains( s.Id ) ).ToListAsync();
         }
 
-        public async Task<bool> UpdateParkingSpace( long id, ParkingSpace newSpace, User? user = null )
+        public async Task<bool> UpdateParkingSpace( long id, ParkingSpace newSpace, long userId )
         {
+            var user = await _userService.GetUserById( userId );
+
             if ( user == null || user.Type != UserType.Manager )
             {
                 throw new InvalidOperationException( "You are not authorized to update this parking space." );
@@ -57,11 +61,13 @@ namespace GarageProject.Service
             }
         }
 
-        public async Task<bool> DeleteParkingSpace( long id, User? user = null )
+        public async Task<bool> DeleteParkingSpace( long id, long userId )
         {
+            var user = await _userService.GetUserById( userId );
+
             if ( user == null || user.Type != UserType.Manager )
             {
-                throw new InvalidOperationException( "You are not authorized to update this parking space." );
+                throw new InvalidOperationException( "You are not authorized to delete this parking space." );
             }
 
             var space = await GetParkingSpaceById( id );

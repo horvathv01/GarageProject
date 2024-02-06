@@ -22,7 +22,7 @@ namespace GarageProject.Service
         Task<int> GetNumberOfEmptySpacesForDate( string date );
         Task<int> GetNumberOfEmptySpacesForDate( DateTime date );
         Task<bool> IsParkingSpaceFree( ParkingSpace space, DateTime start, DateTime end, long? bookingId = null );
-        Task<bool> UpdateBooking( long id, BookingDTO newBooking, User? user = null );
-        Task<bool> DeleteBooking( long id, User? user = null );
+        Task<bool> UpdateBooking( long id, BookingDTO newBooking, long userId );
+        Task<bool> DeleteBooking( long id, long userId );
     }
 }

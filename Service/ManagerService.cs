@@ -92,12 +92,12 @@ public class ManagerService : IManagerService
             .ToListAsync();
     }
 
-    public async Task<bool> UpdateManager(long id, Manager manager)
+    public async Task<bool> UpdateManager(long id, Manager manager, long loggedInUserId )
     {
-        return await _userService.UpdateUser(id, new UserDTO(manager));
+        return await _userService.UpdateUser(id, new UserDTO(manager), loggedInUserId );
     }
 
-    public async Task<bool> UpdateManager(long id, UserDTO manager)
+    public async Task<bool> UpdateManager(long id, UserDTO manager, long loggedInUserId )
     {
         if (manager.Type != Enum.GetName(typeof(UserType), UserType.Manager))
         {

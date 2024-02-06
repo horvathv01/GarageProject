@@ -1,5 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using GarageProject.Service.Factories;
+using GarageProject.Models.Enums;
+using GarageProject.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using System.Security.Claims;
+using System.Text;
+using GarageProject.Service;
 
 namespace GarageProject.Auth;
 
@@ -36,7 +43,52 @@ public class AccessUtilities : IAccessUtilities
         {
             salt += arr[i];
         }
-
         return salt;
+    }
+
+    public Tuple<string, string> GetUserNameAndPassword( string authorizationHeader, string? separator = ":" )
+    {
+        var base64String = Convert.FromBase64String( authorizationHeader );
+        var credentials = Encoding.UTF8.GetString( base64String );
+        var parts = credentials.Split( separator );
+        var email = parts[0];
+        var pass = parts[1];
+
+        return new Tuple<string, string>( email, pass );
+    }
+
+    public ClaimsPrincipal GenerateClaimsPrincipal( User user )
+    {
+        var claims = GenerateClaims( user );
+        var claimsIdentity = GenerateClaimsIdentity( claims );
+        return new ClaimsPrincipal( claimsIdentity );
+    }
+
+    private List<Claim> GenerateClaims( User user )
+    {
+        var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user.Name),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Authentication, user.Id.ToString())
+            };
+        var roleName = Enum.GetName( typeof( UserType ), user.Type );
+        claims.Add( new Claim( ClaimTypes.Role, roleName ?? throw new InvalidOperationException( "Invalid role name" ) ) );
+
+        return claims;
+    }
+
+    private ClaimsIdentity GenerateClaimsIdentity( List<Claim> claims )
+    {
+        return new ClaimsIdentity( claims, CookieAuthenticationDefaults.AuthenticationScheme );
+    }
+
+    public AuthenticationProperties GenerateAuthenticationProperties( int num = 1 )
+    {
+        return new AuthenticationProperties
+        {
+            IsPersistent = true,
+            ExpiresUtc = DateTimeOffset.UtcNow.AddDays( num )
+        };
     }
 }

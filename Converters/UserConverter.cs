@@ -1,7 +1,7 @@
 ﻿using GarageProject.Models;
 using GarageProject.Models.DTOs;
 
-namespace PsychAppointments_API.Converters
+namespace GarageProject.Converters
 {
     public class UserConverter : IUserConverter
     {

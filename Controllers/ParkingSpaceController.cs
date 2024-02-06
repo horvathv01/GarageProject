@@ -11,12 +11,10 @@ namespace PsychAppointments_API.Controllers
     public class ParkingSpaceController : ControllerBase
     {
         private readonly IParkingSpaceService _parkingSpaceService;
-        private readonly IUserService _userService;
 
-        public ParkingSpaceController( IParkingSpaceService parkingSpaceService, IUserService userService )
+        public ParkingSpaceController( IParkingSpaceService parkingSpaceService )
         {
             _parkingSpaceService = parkingSpaceService;
-            _userService = userService;
         }
 
         [HttpGet( "{id}" )]
@@ -89,8 +87,8 @@ namespace PsychAppointments_API.Controllers
         {
             try
             {
-                var user = await GetLoggedInUser();
-                var result = await _parkingSpaceService.UpdateParkingSpace( id, newSpace, user );
+                var userId = GetLoggedInUserId();
+                var result = await _parkingSpaceService.UpdateParkingSpace( id, newSpace, userId );
                 if ( result )
                 {
                     return Ok( "Updating parking space was successful." );
@@ -112,8 +110,8 @@ namespace PsychAppointments_API.Controllers
         {
             try
             {
-                var user = await GetLoggedInUser();
-                var result = await _parkingSpaceService.DeleteParkingSpace( id, user );
+                var userId = GetLoggedInUserId();
+                var result = await _parkingSpaceService.DeleteParkingSpace( id, userId );
                 if ( result )
                 {
                     return Ok( "Parking space deletion was successful." );
@@ -129,11 +127,11 @@ namespace PsychAppointments_API.Controllers
             }
         }
 
-        private async Task<User?> GetLoggedInUser()
+        private long GetLoggedInUserId()
         {
             long userId;
             long.TryParse( HttpContext?.User?.Claims?.FirstOrDefault( claim => claim.Type == ClaimTypes.Authentication )?.Value, out userId );
-            return await _userService.GetUserById( userId );
+            return userId;
         }
     }
 }

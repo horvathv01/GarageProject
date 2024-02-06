@@ -10,10 +10,12 @@ namespace GarageProject.Controllers;
 public class PrepopulateController : ControllerBase
 {
     private readonly IPrepopulate _prepopulate;
+    private readonly ILoggerService _loggerService;
 
-    public PrepopulateController(IPrepopulate prepopulate)
+    public PrepopulateController(IPrepopulate prepopulate, ILoggerService loggerService )
     {
         _prepopulate = prepopulate;
+        _loggerService = loggerService;
     }
 
     [HttpGet]
@@ -24,12 +26,12 @@ public class PrepopulateController : ControllerBase
             //await _prepopulate.PrepopulateInMemory();
             await _prepopulate.PrepopulateDB();
             string message = "DB has been prepopulated";
-            Console.WriteLine(message);
+            _loggerService.Log(message);
             return Ok(message);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _loggerService.Log( e.Message );
             return BadRequest("something went wrong");
         }
         
@@ -42,12 +44,12 @@ public class PrepopulateController : ControllerBase
         {
             await _prepopulate.ClearDb();
             string message = "DB has been cleared";
-            Console.WriteLine(message);
+            _loggerService.Log( message);
             return Ok(message);
         }
         catch (Exception e)
         {
-            Console.WriteLine(e);
+            _loggerService.Log( e.Message );
             return BadRequest("something went wrong");
         }
     }
