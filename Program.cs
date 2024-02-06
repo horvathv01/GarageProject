@@ -6,8 +6,22 @@ using GarageProject.Models;
 using GarageProject.Service;
 using GarageProject.Service.Factories;
 using GarageProject.Converters;
+using System.Net;
+using System.Net.Sockets;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+
+    if(ip == null )
+    {
+        builder.WebHost.UseUrls( "http://localhost:5082" );
+    } else
+    {
+        var https = $"https://{ip}:7021";
+        var http = $"http://{ip}:5082";
+        builder.WebHost.UseUrls(https, http);
+    }
 
 builder.Services.AddCors(options =>
 {

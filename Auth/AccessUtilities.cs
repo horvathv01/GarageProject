@@ -46,11 +46,11 @@ public class AccessUtilities : IAccessUtilities
         return salt;
     }
 
-    public Tuple<string, string> GetUserNameAndPassword( string authorizationHeader )
+    public Tuple<string, string> GetUserNameAndPassword( string authorizationHeader, string? separator = ":" )
     {
         var base64String = Convert.FromBase64String( authorizationHeader );
         var credentials = Encoding.UTF8.GetString( base64String );
-        var parts = credentials.Split( ":" );
+        var parts = credentials.Split( separator );
         var email = parts[0];
         var pass = parts[1];
 
