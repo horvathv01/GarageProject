@@ -40,11 +40,6 @@
     </ItemGroup>
 
 
-    <ItemGroup>
-      <Folder Include="Migrations\" />
-    </ItemGroup>
-
-
 
 
 
