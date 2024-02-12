@@ -7,22 +7,27 @@ namespace GarageProject.Converters
     {
         public DateTime Convert( string date )
         {
-            if(date == "today")
-            {
-                return DateTime.Today;
-            }
-            if(date == "now")
-            {
-                return DateTime.Now;
-            }
+            var today = DateTime.Today;
 
-            DateTime dateParsed;
-            if (!DateTime.TryParse( date, out dateParsed ))
+            switch ( date )
             {
-                throw new Exception( "Date parsing failed" );
+                case "today":
+                    return today;
+                case "now":
+                    return DateTime.Now;
+                case "endoftoday":
+                    return new DateTime( today.Year, today.Month, today.Day, 23, 59, 0 );
+                case "tomorrow":
+                    return today.AddDays( 1 );
+                default:
+                    DateTime dateParsed;
+                    if (!DateTime.TryParse( date, out dateParsed ))
+                    {
+                        throw new Exception( "Date parsing failed" );
+                    }
+                    dateParsed = DateTime.SpecifyKind( dateParsed, DateTimeKind.Utc );
+                    return dateParsed;
             }
-            dateParsed = DateTime.SpecifyKind( dateParsed, DateTimeKind.Utc );
-            return dateParsed;
         }
     }
 }

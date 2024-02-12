@@ -38,7 +38,7 @@ GET /dates: gets bookings by dates (query: startDate, endDate, returns List<Book
 GET /user/dates: gets bookings by dates and userId (query: userId, startDate, endDate, returns List<BookingDTO>?) --> date format: 2024-01-26-15-27-00 ("YYYY\\-MM\\-dd\\HH\\-mm\\-ss")
 GET /ids: gets bookings by list of ids (returns List<BookingDTO>?)
 GET /emptyspaces/date/{date}: gets list of available parking spaces for date (returns List<ParkingSpace>?, options: "today", "tomorrow", date format ("2024-01-17"))
-GET /emptyspaces/daterange: gets list of available parking spaces for time range (auery: startDate, endDate, returns IEnumerable<ParkingSpace>?)
+GET /emptyspaces/daterange: gets list of available parking spaces for time range (query: startDate, endDate, returns IEnumerable<ParkingSpace>?)
 GET /emptyspaces/amount/{date}: gets number of empty spaces on a given date (returns int, options: "today", "tomorrow", date format ("2024-01-17"))
 POST : adds booking (BookingDTO in body in which ParkingSpace is optional (null or object of ParkingSpace type), returns IActionResult)
 PUT /removeday/{id}/{date}: removes date from booking (returns IActionResult, date format ("2024-01-17"))
@@ -51,7 +51,7 @@ DTO classes:
 public class BookingDTO
 {
     public long Id { get; set; }
-    public UserDTO User { get; set; }
+    public long UserId { get; set; }
     public ParkingSpace? ParkingSpace { get; set; }
     public string Start { get; set; }
     public string End { get; set; }
