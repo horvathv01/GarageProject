@@ -32,7 +32,7 @@ namespace GarageProject.Service
 
         public async Task<bool> AddBooking( BookingDTO booking )
         {
-            var user = await _userService.GetUserById( booking.User.Id );
+            var user = await _userService.GetUserById( booking.UserId );
             if ( user == null )
             {
                 throw new BadHttpRequestException( "Booking's user was not found" );

@@ -7,16 +7,19 @@ namespace GarageProject.Models.DTOs
     {
         public long Id { get; set; }
 
-        public UserDTO User { get; set; }
+        //public UserDTO User { get; set; }
+
+        public long UserId { get; set; }
 
         public ParkingSpace? ParkingSpace { get; set; }
 
         public string Start { get; set; }
         public string End { get; set; }
 
-        public BookingDTO( UserDTO user, string start, string end, ParkingSpace? parkingSpace = null, long id = 0 )
+        public BookingDTO( long userId, string start, string end, ParkingSpace? parkingSpace = null, long id = 0 )
         {
-            User = user;
+            //User = user;
+            UserId = userId;
             ParkingSpace = parkingSpace;
             Start = start;
             End = end;
@@ -26,7 +29,7 @@ namespace GarageProject.Models.DTOs
         public BookingDTO( Booking booking )
         {
             Id = booking.Id;
-            User = new UserDTO(booking.User);
+            UserId = booking.UserId;
             ParkingSpace = booking.ParkingSpace;
             Start = booking.Start.ToString( "YYYY\\-MM\\-dd\\HH\\-mm\\-ss" ); //or maybe "yyyy-MM-dd-HH-mm-ss"
             End = booking.End.ToString( "YYYY\\-MM\\-dd\\HH\\-mm\\-ss" );
@@ -36,7 +39,7 @@ namespace GarageProject.Models.DTOs
         {
             return obj is BookingDTO dto
                 && dto.Id.Equals( Id )
-                && dto.User.Equals( User )
+                && dto.UserId == UserId
                 && ( dto.ParkingSpace == null ? ParkingSpace == null : dto.ParkingSpace.Equals(ParkingSpace) )
                 && dto.Start.Equals( Start )
                 && dto.End.Equals( End );

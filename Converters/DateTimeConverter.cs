@@ -7,6 +7,15 @@ namespace GarageProject.Converters
     {
         public DateTime Convert( string date )
         {
+            if(date == "today")
+            {
+                return DateTime.Today;
+            }
+            if(date == "now")
+            {
+                return DateTime.Now;
+            }
+
             DateTime dateParsed;
             if (!DateTime.TryParse( date, out dateParsed ))
             {
