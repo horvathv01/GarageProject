@@ -15,7 +15,7 @@ namespace GarageProject.Converters
                     return today;
                 case "now":
                     return DateTime.Now;
-                case "endoftoday":
+                case "endOfToday":
                     return new DateTime( today.Year, today.Month, today.Day, 23, 59, 0 );
                 case "tomorrow":
                     return today.AddDays( 1 );
