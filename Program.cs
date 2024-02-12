@@ -10,6 +10,7 @@ using System.Net;
 using System.Net.Sockets;
 using PsychAppointments_API.Service;
 using PsychAppointments_API.Models.Enums;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +18,13 @@ var ip = IPManager.GetIpAddress();
 var httpsURL = IPManager.GenerateURL( URLType.https, ip, "7021" );
 var httpURL = IPManager.GenerateURL(URLType.http, ip, "5082");
 
-var frontEndAddress = $"http://{ip}:3000";
-//var frontEndAddress = $"http://192.168.4.144:3000";
+var frontEndAddress = Environment.GetEnvironmentVariable( "frontendUrl" ) ?? $"http://{ip}:3000";
 
-builder.WebHost.UseUrls( httpsURL, httpURL );
+if ( Debugger.IsAttached )
+{
+    frontEndAddress = $"http://{ip}:3000"; //always set frontEndAddress to current machine's ip if run in debug mode
+    builder.WebHost.UseUrls( httpsURL, httpURL );
+}
 
 builder.Services.AddCors(options =>
 {
@@ -81,7 +85,8 @@ var app = builder.Build();
 
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+//if (app.Environment.IsDevelopment())
+if( Debugger.IsAttached )
 {
     app.UseSwagger();
     app.UseSwaggerUI();
