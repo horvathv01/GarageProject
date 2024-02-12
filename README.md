@@ -41,6 +41,7 @@ GET /emptyspaces/date/{date}: gets list of available parking spaces for date (re
 GET /emptyspaces/daterange: gets list of available parking spaces for time range (auery: startDate, endDate, returns IEnumerable<ParkingSpace>?)
 GET /emptyspaces/amount/{date}: gets number of empty spaces on a given date (returns int, options: "today", "tomorrow", date format ("2024-01-17"))
 POST : adds booking (BookingDTO in body in which ParkingSpace is optional (null or object of ParkingSpace type), returns IActionResult)
+PUT /removeday/{id}/{date}: removes date from booking (returns IActionResult, date format ("2024-01-17"))
 PUT /{id}: updates booking (BookingDTO in body, returns IActionResult)
 DELETE /{id}: deletes booking (returns IActionResult)
 

@@ -8,27 +8,26 @@ using GarageProject.Service.Factories;
 using GarageProject.Converters;
 using System.Net;
 using System.Net.Sockets;
+using PsychAppointments_API.Service;
+using PsychAppointments_API.Models.Enums;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var ip = Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+var ip = IPManager.GetIpAddress();
+var httpsURL = IPManager.GenerateURL( URLType.https, ip, "7021" );
+var httpURL = IPManager.GenerateURL(URLType.http, ip, "5082");
 
-    if(ip == null )
-    {
-        builder.WebHost.UseUrls( "http://localhost:5082" );
-    } else
-    {
-        var https = $"https://{ip}:7021";
-        var http = $"http://{ip}:5082";
-        builder.WebHost.UseUrls(https, http);
-    }
+var frontEndAddress = $"http://{ip}:3000";
+//var frontEndAddress = $"http://192.168.4.144:3000";
+
+builder.WebHost.UseUrls( httpsURL, httpURL );
 
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000", $"http://192.168.4.144:3000")
+            policy.WithOrigins("http://localhost:3000", frontEndAddress)
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials();

@@ -197,6 +197,28 @@ namespace GarageProject.Controllers
             }
         }
 
+        [HttpPut("removeday/{id}/{date}")]
+        //[Authorize]
+        public async Task<IActionResult> RemoveDayFromBooking( long id, string date )
+        {
+            try
+            {
+                var userId = GetLoggedInUserId();
+                var result = await _bookingService.RemoveDayFromBooking( id, date, userId );
+                if( result )
+                {
+                    return Ok( "Removing day from booking was successful." );
+                } else
+                {
+                    return BadRequest( "Removing day from booking failed." );
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest( ex.Message );
+            }
+        }
+
         [HttpPut( "{id}" )]
         //[Authorize]
         public async Task<IActionResult> UpdateBooking( long id, [FromBody] BookingDTO newBooking )

@@ -14,7 +14,7 @@ namespace GarageProject.Models.DTOs
         public string Start { get; set; }
         public string End { get; set; }
 
-        public BookingDTO(UserDTO user, string start, string end, ParkingSpace? parkingSpace = null, long id = 0 )
+        public BookingDTO( UserDTO user, string start, string end, ParkingSpace? parkingSpace = null, long id = 0 )
         {
             User = user;
             ParkingSpace = parkingSpace;
@@ -23,7 +23,7 @@ namespace GarageProject.Models.DTOs
             Id = id;
         }
 
-        public BookingDTO(Booking booking )
+        public BookingDTO( Booking booking )
         {
             Id = booking.Id;
             User = new UserDTO(booking.User);
