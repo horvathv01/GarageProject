@@ -1,4 +1,5 @@
 ﻿using GarageProject.Models;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GarageProject.Models.DTOs
@@ -14,6 +15,8 @@ namespace GarageProject.Models.DTOs
         public string Start { get; set; }
         public string End { get; set; }
 
+
+        [JsonConstructor]
         public BookingDTO( long userId, string start, string end, ParkingSpace? parkingSpace = null, long id = 0 )
         {
             UserId = userId;
