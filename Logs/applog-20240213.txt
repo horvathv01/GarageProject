@@ -1,0 +1,22 @@
+2024-02-13 09:55:27.326 +01:00 [DBG] Registered model binder providers, in the following order: ["Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BinderTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ServicesModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.BodyModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.HeaderModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FloatingPointTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.EnumTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DateTimeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.SimpleTypeModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.TryParseModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CancellationTokenModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ByteArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormFileModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.FormCollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.KeyValuePairModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.DictionaryModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ArrayModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.CollectionModelBinderProvider","Microsoft.AspNetCore.Mvc.ModelBinding.Binders.ComplexObjectModelBinderProvider"]
+2024-02-13 09:55:27.484 +01:00 [DBG] Hosting starting
+2024-02-13 09:55:27.633 +01:00 [INF] User profile is available. Using 'C:\Users\vhorvath\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2024-02-13 09:55:27.638 +01:00 [DBG] Reading data from file 'C:\Users\vhorvath\AppData\Local\ASP.NET\DataProtection-Keys\key-4621dcd9-05ec-476c-b89e-448185e06ea3.xml'.
+2024-02-13 09:55:27.685 +01:00 [DBG] Found key {4621dcd9-05ec-476c-b89e-448185e06ea3}.
+2024-02-13 09:55:27.707 +01:00 [DBG] Considering key {4621dcd9-05ec-476c-b89e-448185e06ea3} with expiration date 2024-02-19 15:29:54Z as default key.
+2024-02-13 09:55:27.712 +01:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.XmlEncryption.DpapiXmlDecryptor, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2024-02-13 09:55:27.717 +01:00 [DBG] Decrypting secret element using Windows DPAPI.
+2024-02-13 09:55:27.719 +01:00 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=6.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2024-02-13 09:55:27.725 +01:00 [DBG] Opening CNG algorithm 'AES' from provider 'null' with chaining mode CBC.
+2024-02-13 09:55:27.728 +01:00 [DBG] Opening CNG algorithm 'SHA256' from provider 'null' with HMAC.
+2024-02-13 09:55:27.732 +01:00 [DBG] Using key {4621dcd9-05ec-476c-b89e-448185e06ea3} as the default key.
+2024-02-13 09:55:27.734 +01:00 [DBG] Key ring with default key {4621dcd9-05ec-476c-b89e-448185e06ea3} was loaded during application startup.
+2024-02-13 09:55:28.248 +01:00 [INF] Now listening on: https://192.168.4.80:7021
+2024-02-13 09:55:28.249 +01:00 [INF] Now listening on: http://192.168.4.80:5082
+2024-02-13 09:55:28.250 +01:00 [DBG] Loaded hosting startup assembly GarageProject
+2024-02-13 09:55:28.251 +01:00 [DBG] Loaded hosting startup assembly Microsoft.AspNetCore.Watch.BrowserRefresh
+2024-02-13 09:55:28.252 +01:00 [DBG] Loaded hosting startup assembly Microsoft.WebTools.BrowserLink.Net
+2024-02-13 09:55:28.254 +01:00 [INF] Application started. Press Ctrl+C to shut down.
+2024-02-13 09:55:28.255 +01:00 [INF] Hosting environment: Development
+2024-02-13 09:55:28.256 +01:00 [INF] Content root path: C:\DevOps\Private\GarageProject
+2024-02-13 09:55:28.257 +01:00 [DBG] Hosting started

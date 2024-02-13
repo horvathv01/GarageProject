@@ -54,4 +54,9 @@ public class UserDTO
             && user.Phone.Equals( Phone )
             && user.DateOfBirth == DateOfBirth;
     }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine( Id, Name, Type, Email, Phone, DateOfBirth, Password );
+    }
 }

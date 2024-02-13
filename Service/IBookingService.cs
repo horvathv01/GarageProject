@@ -1,6 +1,5 @@
 ﻿using GarageProject.Models;
 using GarageProject.Models.DTOs;
-using GarageProject.Models;
 
 namespace GarageProject.Service
 {
