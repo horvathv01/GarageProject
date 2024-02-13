@@ -3,6 +3,6 @@
     public interface IDateTimeConverter
     {
         DateTime Convert( string date );
-        string Convert( DateTime date );
+        string Convert( DateTime date, string formatString );
     }
 }

@@ -36,8 +36,8 @@ namespace GarageProject.Models.DTOs
             Id = booking.Id;
             UserId = booking.UserId;
             ParkingSpace = booking.ParkingSpace;
-            Start = booking.Start.ToString( "yyyy\\-MM\\-dd\\H\\-mm\\-ss" ); //or maybe "yyyy-MM-dd-HH-mm-ss"
-            End = booking.End.ToString( "yyyy\\-MM\\-dd\\H\\-mm\\-ss" );
+            Start = booking.Start.ToString( "yyyy-MM-dd-HH-mm-ss" );
+            End = booking.End.ToString( "yyyy-MM-dd-HH-mm-ss" );
         }
 
         public override bool Equals( object? obj )
