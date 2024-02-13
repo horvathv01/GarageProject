@@ -9,11 +9,15 @@ namespace GarageProject.Models
 
         public bool IsDeleted { get; set; } = false;
 
-
         public override bool Equals( object? obj )
         {
-            return obj is ParkingSpace space 
-                && space.Id == Id;
+            return obj is ParkingSpace space &&
+                     Id == space.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine( Id );
         }
 
         public override string ToString()

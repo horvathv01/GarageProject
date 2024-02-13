@@ -54,9 +54,4 @@ public class UserDTO
             && user.Phone.Equals( Phone )
             && user.DateOfBirth == DateOfBirth;
     }
-
-    public override int GetHashCode()
-    {
-        throw new NotImplementedException();
-    }
 }

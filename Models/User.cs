@@ -47,6 +47,6 @@ public class User
 
     public override int GetHashCode()
     {
-        throw new NotImplementedException();
+        return HashCode.Combine( Id, Name, Type, Email, Phone, DateOfBirth, Password, Bookings );
     }
 }

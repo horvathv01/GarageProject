@@ -49,7 +49,7 @@ namespace GarageProject.Models
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            return HashCode.Combine( Id, UserId, User, ParkingSpaceId, ParkingSpace, Start, End );
         }
     }
 }

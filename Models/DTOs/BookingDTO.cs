@@ -44,10 +44,5 @@ namespace GarageProject.Models.DTOs
                 && dto.Start.Equals( Start )
                 && dto.End.Equals( End );
         }
-
-        public override int GetHashCode()
-        {
-            throw new NotImplementedException();
-        }
     }
 }
