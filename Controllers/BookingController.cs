@@ -25,7 +25,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "{id}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetBookingById( long id )
         {
             try
@@ -41,7 +41,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAllBookings()
         {
             try
@@ -57,7 +57,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "user/{userId}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetBookingsByUser( long userId )
         {
             try
@@ -73,7 +73,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "dates" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetBookingsByDates(
         [FromQuery] string startDate,
         [FromQuery] string endDate )
@@ -91,7 +91,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "user/dates" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetBookingsByUserAndDates(
         [FromQuery] long userId,
         [FromQuery] string startDate,
@@ -111,7 +111,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "ids" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetBookingsByListOfIds( [FromBody] List<long> ids )
         {
             try
@@ -128,7 +128,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "emptyspaces/date/{date}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetEmptyParkingSpaces( string date )
         {
             try
@@ -143,7 +143,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "emptyspaces/daterange" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetEmptyParkingSpacesForTimeRange(
         [FromQuery] string startDate,
         [FromQuery] string endDate )
@@ -160,7 +160,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpGet( "emptyspaces/amount/{date}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAmountOfEmptySpacesFoRDate( string date )
         {
             try
@@ -176,7 +176,7 @@ namespace GarageProject.Controllers
 
 
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> AddBooking( [FromBody] BookingDTO booking )
         {
             try
@@ -198,7 +198,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpPut("removeday/{id}/{date}")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> RemoveDayFromBooking( long id, string date )
         {
             try
@@ -220,7 +220,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpPut( "{id}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> UpdateBooking( long id, [FromBody] BookingDTO newBooking )
         {
             try
@@ -243,7 +243,7 @@ namespace GarageProject.Controllers
         }
 
         [HttpDelete( "{id}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> DeleteBooking( long id )
         {
             try
