@@ -24,7 +24,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet( "{id}" )]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> GetUser( long id )
     {
         try
@@ -40,7 +40,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> GetAllUsers()
     {
         try
@@ -56,7 +56,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet( "email/{email}" )]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> GetUserByEmail( string email )
     {
         try
@@ -72,7 +72,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet( "allmanagers" )]
-    //[Authorize]
+    [Authorize]
     public async Task<IActionResult> GetAllManagers()
     {
         try

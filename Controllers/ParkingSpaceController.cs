@@ -2,6 +2,7 @@
 using GarageProject.Models.DTOs;
 using GarageProject.Models.Enums;
 using GarageProject.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -18,7 +19,7 @@ namespace PsychAppointments_API.Controllers
         }
 
         [HttpGet( "{id}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetParkingSpaceById( long id )
         {
             try
@@ -33,7 +34,7 @@ namespace PsychAppointments_API.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAllParkingSpaces( long id )
         {
             try
@@ -48,7 +49,7 @@ namespace PsychAppointments_API.Controllers
         }
 
         [HttpGet( "ids" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetParkingSpacesByListOfIds( [FromBody] List<long> ids )
         {
             try
@@ -63,7 +64,7 @@ namespace PsychAppointments_API.Controllers
         }
 
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> AddParkingSpace( [FromBody] ParkingSpace space )
         {
             try
@@ -82,7 +83,7 @@ namespace PsychAppointments_API.Controllers
         }
 
         [HttpPut( "{id}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> UpdateParkingSpace( long id, [FromBody] ParkingSpace newSpace )
         {
             try
@@ -105,7 +106,7 @@ namespace PsychAppointments_API.Controllers
         }
 
         [HttpDelete( "{id}" )]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> DeleteParkingSpace( long id )
         {
             try
