@@ -29,5 +29,10 @@ namespace GarageProject.Converters
                     return dateParsed;
             }
         }
+
+        public string Convert( DateTime date )
+        {
+            return date.ToString("yyyy-MM-dd-HH-mm-ss");
+        }
     }
 }
