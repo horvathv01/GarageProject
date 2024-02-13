@@ -59,14 +59,9 @@ public class UserService : IUserService
 
     public async Task<User?> GetUserById( long id )
     {
-        var user = await _context.Users
+        return await _context.Users
             .Include( u => u.Bookings )
             .FirstOrDefaultAsync( cli => cli.Id == id );
-        if ( user != null && user.Type == UserType.Manager )
-        {
-            return user as Manager;
-        }
-        return user;
     }
 
     public async Task<User?> GetUserByEmail( string email )

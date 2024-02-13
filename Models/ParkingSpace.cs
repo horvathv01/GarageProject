@@ -16,11 +16,6 @@ namespace GarageProject.Models
                 && space.Id == Id;
         }
 
-        public override int GetHashCode()
-        {
-            throw new NotImplementedException();
-        }
-
         public override string ToString()
         {
             return $"Parking Space Id: {Id}, IsDeleted: {IsDeleted}";

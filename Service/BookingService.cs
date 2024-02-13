@@ -169,7 +169,8 @@ namespace GarageProject.Service
         {
             var parkingSpaces = await _parkingSpaceService.GetAllParkingSpaces();
             var bookingsForDates = await GetBookingsByDates( startDate, endDate );
-            var listOfParkingSpacesInvolved = bookingsForDates?.Select( b => b.ParkingSpace ).Distinct().ToList();
+            var listOfParkingSpacesInvolved = bookingsForDates == null ? null 
+                : bookingsForDates.Select( b => b.ParkingSpace ).Distinct().ToList();
 
             return listOfParkingSpacesInvolved == null ?
                 parkingSpaces :
