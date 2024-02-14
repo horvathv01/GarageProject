@@ -161,11 +161,26 @@ namespace GarageProject.Controllers
 
         [HttpGet( "emptyspaces/amount/{date}" )]
         [Authorize]
-        public async Task<IActionResult> GetAmountOfEmptySpacesFoRDate( string date )
+        public async Task<IActionResult> GetAmountOfEmptySpacesForDate( string date )
         {
             try
             {
                 var result = await _bookingService.GetNumberOfEmptySpacesForDate( date );
+                return Ok( result );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
+        }
+
+        [HttpGet("fulldaysofmonth/{date}")]
+        [Authorize]
+        public async Task<IActionResult> GetFullDaysOfMonth( string date )
+        {
+            try
+            {
+                var result = await _bookingService.GetFullDaysOfMonth( date );
                 return Ok( result );
             }
             catch ( Exception ex )

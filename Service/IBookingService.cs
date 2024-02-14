@@ -20,6 +20,7 @@ namespace GarageProject.Service
         Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange( string startDate, string endDate );
         Task<int> GetNumberOfEmptySpacesForDate( string date );
         Task<int> GetNumberOfEmptySpacesForDate( DateTime date );
+        Task<IEnumerable<DateTime>> GetFullDaysOfMonth( string? date = null );
         Task<bool> IsParkingSpaceFree( ParkingSpace space, DateTime start, DateTime end, long? bookingId = null );
         Task<bool> RemoveDayFromBooking( long bookingId, string date, long userId );
         Task<bool> UpdateBooking( long id, BookingDTO newBooking, long userId );

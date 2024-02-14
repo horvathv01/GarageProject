@@ -193,6 +193,45 @@ namespace GarageProject.Service
             return result == null ? 0 : result.Count();
         }
 
+
+
+
+        public async Task<IEnumerable<DateTime>> GetFullDaysOfMonth( string? date = null )
+        {
+            DateTime month;
+
+            if( date == null )
+            {
+                month = DateTime.Now;
+            } 
+            else
+            {
+                var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
+                if ( dateTimeConverter == null )
+                {
+                    throw new Exception( "Dependency injection failed." );
+                }
+                month = dateTimeConverter.Convert( date );
+            }
+
+            var result = new List<DateTime>();
+            var daysInMonth = DateTime.DaysInMonth(month.Year, month.Month);
+
+            for(int i = 1; i <= daysInMonth; i++ )
+            {
+                var checkDay = new DateTime( month.Year, month.Month, i );
+                var numberOfEmptySpaces = await GetNumberOfEmptySpacesForDate( checkDay );
+                if ( numberOfEmptySpaces == 0 )
+                {
+                    result.Add( checkDay );
+                }
+            }
+            return result;
+        }
+
+
+
+
         public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForDate( string date )
         {
             DateTime dateParsed;
