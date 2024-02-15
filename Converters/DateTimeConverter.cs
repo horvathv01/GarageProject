@@ -30,7 +30,7 @@ namespace GarageProject.Converters
             }
         }
 
-        public string Convert( DateTime date, string formatString = "yyyy-MM-dd-HH-mm-ss" )
+        public string Convert( DateTime date, string? formatString = "yyyy-MM-dd-HH-mm-ss" )
         {
             return date.ToString( formatString );
         }

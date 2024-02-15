@@ -13,19 +13,20 @@ namespace GarageProject.Service
     {
         private readonly GarageProjectContext _context;
         private readonly IUserService _userService;
-        private readonly IServiceProvider _serviceProvider;
         private readonly IParkingSpaceService _parkingSpaceService;
+        private readonly IDateTimeConverter _dateTimeConverter;
 
         public BookingService(
             GarageProjectContext context,
-            IServiceProvider serviceProvider,
             IUserService userService,
-            IParkingSpaceService parkingSpaceService )
+            IParkingSpaceService parkingSpaceService,
+            IDateTimeConverter dateTimeConverter
+            )
         {
             _context = context;
-            _serviceProvider = serviceProvider;
             _userService = userService;
             _parkingSpaceService = parkingSpaceService;
+            _dateTimeConverter = dateTimeConverter;
         }
 
         public async Task<bool> AddBooking( BookingDTO booking )
@@ -36,14 +37,8 @@ namespace GarageProject.Service
                 throw new BadHttpRequestException( "Booking's user was not found" );
             }
 
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-
-            var startDateParsed = dateTimeConverter.Convert( booking.Start );
-            var endDateParsed = dateTimeConverter.Convert( booking.End );
+            var startDateParsed = _dateTimeConverter.Convert( booking.Start );
+            var endDateParsed = _dateTimeConverter.Convert( booking.End );
 
             ParkingSpace? parkingSpace;
 
@@ -83,13 +78,8 @@ namespace GarageProject.Service
         }
         public async Task<IEnumerable<Booking>?> GetBookingsByDates( string startDate, string endDate )
         {
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            var startDateParsed = dateTimeConverter.Convert( startDate );
-            var endDateParsed = dateTimeConverter.Convert( endDate );
+            var startDateParsed = _dateTimeConverter.Convert( startDate );
+            var endDateParsed = _dateTimeConverter.Convert( endDate );
 
             return await GetBookingsByDates( startDateParsed, endDateParsed );
         }
@@ -127,13 +117,8 @@ namespace GarageProject.Service
                 throw new BadHttpRequestException( $"User with id {userId} not found" );
             }
 
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            var startDateParsed = dateTimeConverter.Convert( startDate );
-            var endDateParsed = dateTimeConverter.Convert( endDate );
+            var startDateParsed = _dateTimeConverter.Convert( startDate );
+            var endDateParsed = _dateTimeConverter.Convert( endDate );
 
             return await GetBookingsByUser( user, startDateParsed, endDateParsed );
         }
@@ -178,12 +163,7 @@ namespace GarageProject.Service
 
         public async Task<int> GetNumberOfEmptySpacesForDate( string date )
         {
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            var dateParsed = dateTimeConverter.Convert( date );
+            var dateParsed = _dateTimeConverter.Convert( date );
             return await GetNumberOfEmptySpacesForDate( dateParsed );
         }
 
@@ -193,25 +173,16 @@ namespace GarageProject.Service
             return result == null ? 0 : result.Count();
         }
 
-
-
-
         public async Task<IEnumerable<DateTime>> GetFullDaysOfMonth( string? date = null )
         {
             DateTime month;
-
             if( date == null )
             {
                 month = DateTime.Now;
             } 
             else
             {
-                var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-                if ( dateTimeConverter == null )
-                {
-                    throw new Exception( "Dependency injection failed." );
-                }
-                month = dateTimeConverter.Convert( date );
+                month = _dateTimeConverter.Convert( date );
             }
 
             var result = new List<DateTime>();
@@ -229,30 +200,17 @@ namespace GarageProject.Service
             return result;
         }
 
-
-
-
         public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForDate( string date )
         {
             DateTime dateParsed;
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            dateParsed = dateTimeConverter.Convert( date );
+            dateParsed = _dateTimeConverter.Convert( date );
             return await GetAvailableParkingSpacesForDate( dateParsed );
         }
 
         public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange( string startDate, string endDate )
         {
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-            var startDateParsed = dateTimeConverter.Convert( startDate );
-            var endDateParsed = dateTimeConverter.Convert( endDate );
+            var startDateParsed = _dateTimeConverter.Convert( startDate );
+            var endDateParsed = _dateTimeConverter.Convert( endDate );
 
             return await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
         }
@@ -288,13 +246,7 @@ namespace GarageProject.Service
                 throw new BadHttpRequestException( $"Booking with id {bookingId} not found." );
             }
 
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-
-            var day = dateTimeConverter.Convert( date );
+            var day = _dateTimeConverter.Convert( date );
 
             if ( booking.Start.Date > day.Date || booking.End.Date < day.Date )
             {
@@ -352,14 +304,8 @@ namespace GarageProject.Service
                 throw new UnauthorizedAccessException( "You are not authorized to update this booking." );
             }
 
-            var dateTimeConverter = _serviceProvider.GetService<IDateTimeConverter>();
-            if ( dateTimeConverter == null )
-            {
-                throw new Exception( "Dependency injection failed." );
-            }
-
-            var startDateParsed = dateTimeConverter.Convert( newBooking.Start );
-            var endDateParsed = dateTimeConverter.Convert( newBooking.End );
+            var startDateParsed = _dateTimeConverter.Convert( newBooking.Start );
+            var endDateParsed = _dateTimeConverter.Convert( newBooking.End );
 
             ParkingSpace? parkingSpace;
 
