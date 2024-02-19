@@ -45,6 +45,11 @@ namespace GarageProject.Service
 
         public async Task<bool> AddBooking( User user, DateTime startDate, DateTime endDate, ParkingSpace? parkingSpace = null )
         {
+            if ( startDate > endDate )
+            {
+                throw new InvalidOperationException( "The start date must not be after the end date." );
+            }
+
             if ( parkingSpace == null || !await IsParkingSpaceFree( parkingSpace, startDate, endDate ) )
             {
                 var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDate, endDate );
@@ -84,6 +89,11 @@ namespace GarageProject.Service
 
         public async Task<IEnumerable<Booking>?> GetBookingsByDates( DateTime startDate, DateTime endDate )
         {
+            if ( startDate > endDate )
+            {
+                throw new InvalidOperationException( "The start date must not be after the end date." );
+            }
+
             return await _context.Bookings.Where( b =>
             ( b.Start <= endDate && b.End >= startDate ) ||
             ( startDate <= b.End && endDate >= b.Start ) ||
@@ -123,6 +133,11 @@ namespace GarageProject.Service
 
         public async Task<IEnumerable<Booking>?> GetBookingsByUser( User user, DateTime startDate, DateTime endDate )
         {
+            if ( startDate > endDate )
+            {
+                throw new InvalidOperationException( "The start date must not be after the end date." );
+            }
+
             return await _context.Bookings.Where( b =>
             ( b.UserId == user.Id && b.Start <= endDate && b.End >= startDate ) ||
             ( b.UserId == user.Id && startDate <= b.End && endDate >= b.Start ) ||
@@ -149,6 +164,11 @@ namespace GarageProject.Service
 
         public async Task<IEnumerable<ParkingSpace>?> GetAvailableParkingSpacesForTimeRange( DateTime startDate, DateTime endDate )
         {
+            if ( startDate > endDate )
+            {
+                throw new InvalidOperationException( "The start date must not be after the end date." );
+            }
+
             var parkingSpaces = await _parkingSpaceService.GetAllParkingSpaces();
             var bookingsForDates = await GetBookingsByDates( startDate, endDate );
             var listOfParkingSpacesInvolved = bookingsForDates == null ? null 
@@ -298,7 +318,10 @@ namespace GarageProject.Service
             var startDate = _dateTimeConverter.Convert( startDateString );
             var endDate = _dateTimeConverter.Convert( endDateString );
 
-            if(startDate > endDate)
+            startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
+            endDate = new DateTime( endDate.Year, endDate.Month, endDate.Day, 23, 59, 0 );
+
+            if( startDate > endDate )
             {
                 throw new InvalidOperationException( "The start date must not be after the end date." );
             }
@@ -330,6 +353,9 @@ namespace GarageProject.Service
             }
             var startDate = _dateTimeConverter.Convert( startDateString );
             var endDate = _dateTimeConverter.Convert( endDateString );
+
+            startDate = new DateTime( startDate.Year, startDate.Month, startDate.Day, 0, 0, 0 );
+            endDate = new DateTime( endDate.Year, endDate.Month, endDate.Day, 23, 59, 0 );
 
             if ( startDate > endDate )
             {
