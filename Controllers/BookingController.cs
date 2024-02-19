@@ -189,6 +189,45 @@ namespace GarageProject.Controllers
             }
         }
 
+        [HttpPost("filldays")]
+        [Authorize]
+        public async Task<IActionResult> FillDaysWithBookings(
+        [FromBody] long userId,
+        [FromBody] string startDate,
+        [FromBody] string endDate,
+        [FromBody] ParkingSpace parkingSpace )
+        {
+            try
+            {
+                var loggedInUserId = GetLoggedInUserId();
+                var result = await _bookingService.FillDaysWithBookings(loggedInUserId, userId, startDate, endDate, parkingSpace );
+                return Ok( $"Filling dates between {startDate} and {endDate} was successful." );
+            }
+            catch( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
+        }
+
+        [HttpPost("removedays")]
+        [Authorize]
+        public async Task<IActionResult> RemoveBookingsFromDaysInRange(
+        [FromQuery] long userId,
+        [FromQuery] string startDate,
+        [FromQuery] string endDate )
+        {
+            try
+            {
+                var loggedInUserId = GetLoggedInUserId();
+                var result = await _bookingService.RemoveBookingsFromDaysInRange( loggedInUserId, userId, startDate, endDate );
+                return Ok( $"Removing bookings from dates between {startDate} and {endDate} was successful." );
+            }
+            catch ( Exception ex )
+            {
+                return BadRequest( ex.Message );
+            }
+        }
+
 
         [HttpPost]
         [Authorize]

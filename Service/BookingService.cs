@@ -40,16 +40,14 @@ namespace GarageProject.Service
             var startDateParsed = _dateTimeConverter.Convert( booking.Start );
             var endDateParsed = _dateTimeConverter.Convert( booking.End );
 
-            ParkingSpace? parkingSpace;
+            return await AddBooking(user, startDateParsed, endDateParsed, booking.ParkingSpace );
+        }
 
-            if ( booking.ParkingSpace != null && await IsParkingSpaceFree( booking.ParkingSpace, startDateParsed, endDateParsed ) )
+        public async Task<bool> AddBooking( User user, DateTime startDate, DateTime endDate, ParkingSpace? parkingSpace = null )
+        {
+            if ( parkingSpace == null || !await IsParkingSpaceFree( parkingSpace, startDate, endDate ) )
             {
-                parkingSpace = booking.ParkingSpace;
-            }
-            else
-            {
-                //we find a suitable parking space
-                var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDateParsed, endDateParsed );
+                var availableParkingSpaces = await GetAvailableParkingSpacesForTimeRange( startDate, endDate );
                 if ( availableParkingSpaces == null || availableParkingSpaces.Count() == 0 )
                 {
                     throw new Exception( "There are no available parking spaces in the requested time range." );
@@ -57,7 +55,7 @@ namespace GarageProject.Service
                 parkingSpace = availableParkingSpaces.First();
             }
 
-            Booking newBooking = new Booking( user, parkingSpace, startDateParsed, endDateParsed );
+            Booking newBooking = new Booking( user, parkingSpace, startDate, endDate );
             await _context.Bookings.AddAsync( newBooking );
             await _context.SaveChangesAsync();
 
@@ -286,6 +284,65 @@ namespace GarageProject.Service
             var newBooking = new BookingDTO( booking );
             newBooking.Start = newStart.ToString( "yyyy.MM.dd HH:mm", CultureInfo.InvariantCulture );
             await AddBooking( newBooking );
+            return true;
+        }
+
+        public async Task<bool> FillDaysWithBookings(long loggedInUserId, long userId, string startDateString, string endDateString, ParkingSpace? parkingSpace = null )
+        {
+            var loggedInUser = await _userService.GetUserById( loggedInUserId );
+            var user = loggedInUserId == userId ? loggedInUser : await _userService.GetUserById( userId );
+            if( user == null || loggedInUser == null || ( user.Type != UserType.Manager && !loggedInUser.Equals(user) ) )
+            {
+                throw new UnauthorizedAccessException( "You are not authorized to update this booking." );
+            }
+            var startDate = _dateTimeConverter.Convert( startDateString );
+            var endDate = _dateTimeConverter.Convert( endDateString );
+
+            if(startDate > endDate)
+            {
+                throw new InvalidOperationException( "The start date must not be after the end date." );
+            }
+
+            var finished = false;
+            var tasks = new List<Task>();
+
+            while( !finished )
+            {
+                tasks.Add( AddBooking( user, startDate, endDate, parkingSpace ) );
+                if( startDate.Date.Equals( endDate.Date ) )
+                {
+                    finished = true;
+                }
+                startDate = startDate.AddDays( 1 );
+            }
+            await Task.WhenAll( tasks );
+
+            return true;
+        }
+
+        public async Task<bool> RemoveBookingsFromDaysInRange(long loggedInUserId, long userId, string startDateString, string endDateString )
+        {
+            var loggedInUser = await _userService.GetUserById( loggedInUserId );
+            var user = loggedInUserId == userId ? loggedInUser : await _userService.GetUserById( userId );
+            if ( user == null || loggedInUser == null || ( user.Type != UserType.Manager && !loggedInUser.Equals( user ) ) )
+            {
+                throw new UnauthorizedAccessException( "You are not authorized to update this booking." );
+            }
+            var startDate = _dateTimeConverter.Convert( startDateString );
+            var endDate = _dateTimeConverter.Convert( endDateString );
+
+            if ( startDate > endDate )
+            {
+                throw new InvalidOperationException( "The start date must not be after the end date." );
+            }
+
+            var bookings = await GetBookingsByUser(user, startDate, endDate);
+            if( bookings == null )
+            {
+                throw new InvalidOperationException( $"No bookings were found within the provided date range for user {user.Name}." );
+            }
+            _context.RemoveRange( bookings );
+            await _context.SaveChangesAsync();
             return true;
         }
 
