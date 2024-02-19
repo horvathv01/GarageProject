@@ -192,9 +192,9 @@ namespace GarageProject.Controllers
         [HttpPost("filldays")]
         [Authorize]
         public async Task<IActionResult> FillDaysWithBookings(
-        [FromBody] long userId,
-        [FromBody] string startDate,
-        [FromBody] string endDate,
+        [FromQuery] long userId,
+        [FromQuery] string startDate,
+        [FromQuery] string endDate,
         [FromBody] ParkingSpace parkingSpace )
         {
             try
