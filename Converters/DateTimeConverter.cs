@@ -1,5 +1,7 @@
 ﻿
 using GarageProject.Models;
+using Microsoft.AspNetCore.Http;
+using System.Globalization;
 
 namespace GarageProject.Converters
 {
@@ -21,9 +23,11 @@ namespace GarageProject.Converters
                     return today.AddDays( 1 );
                 default:
                     DateTime dateParsed;
-                    if (!DateTime.TryParse( date, out dateParsed ))
+                    if (!DateTime.TryParse( date, out dateParsed ) && 
+                        !DateTime.TryParseExact( date, "yyyy-MM-dd-HH-mm-ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateParsed )
+                        )
                     {
-                        throw new Exception( $"Date parsing failed for value {date}" );
+                            throw new Exception( $"Date parsing failed for value {date}" );
                     }
                     dateParsed = DateTime.SpecifyKind( dateParsed, DateTimeKind.Utc );
                     return dateParsed;
