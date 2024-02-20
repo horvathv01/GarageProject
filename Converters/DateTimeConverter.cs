@@ -23,7 +23,7 @@ namespace GarageProject.Converters
                     DateTime dateParsed;
                     if (!DateTime.TryParse( date, out dateParsed ))
                     {
-                        throw new Exception( "Date parsing failed" );
+                        throw new Exception( $"Date parsing failed for value {date}" );
                     }
                     dateParsed = DateTime.SpecifyKind( dateParsed, DateTimeKind.Utc );
                     return dateParsed;
